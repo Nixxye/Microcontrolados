@@ -1362,7 +1362,7 @@ ARM Macro Assembler    Page 21
   505 00000150 4945            LDR              R1, =GPIO_PORTA_DATA_R ;Carrega
                                                              o valor do offset 
                                                             do data register
-  506 00000152 F009 02F0       AND              R2, R9, #2_11110000 ;Fazer o AN
+  506 00000152 F029 020F       BIC              R2, R9, #2_00001111 ;Fazer o AN
 
 
 

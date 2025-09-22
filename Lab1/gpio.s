@@ -503,7 +503,7 @@ PortN_Output
 ; Par�metro de sa�da: N�o tem
 PortA_Output
 	LDR	R1, =GPIO_PORTA_DATA_R		    ;Carrega o valor do offset do data register
-	AND R2, R9, #2_11110000             ;Fazer o AND da par�metro de entrada com os bits que queremos ler
+	BIC R2, R9, #2_00001111             ;Fazer o AND da par�metro de entrada com os bits que queremos ler
 	STR R2, [R1]                        ;Escreve na porta Q o barramento de dados dos pinos [Q3-Q0]
 	BX LR								;Retorno
 

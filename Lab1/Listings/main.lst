@@ -90,7 +90,7 @@ ARM Macro Assembler    Page 2
    53 00000010 F04F 0B19       MOV              R11, #25    ; Temperatura alvo
    54 00000014 F04F 0600       MOV              R6, #0      ; contador de tempo
                                                             
-   55 00000018 E057            B                MainLoop
+   55 00000018 E059            B                MainLoop
    56 0000001A         
    57 0000001A         Acende0Display                       ; Acende segmentos:
                                                              a, b, c, d, e, f
@@ -98,7 +98,7 @@ ARM Macro Assembler    Page 2
    59 0000001E F7FF FFFE       BL               PortA_Output
    60 00000022 F04F 090F       MOV              R9, #2_1111 ; PQ
    61 00000026 F7FF FFFE       BL               PortQ_Output
-   62 0000002A E07D            B                FimAcende
+   62 0000002A E0A2            B                FimAcende
    63 0000002C         
    64 0000002C         Acende1Display                       ; Acende segmentos:
                                                              b, c
@@ -107,7 +107,7 @@ ARM Macro Assembler    Page 2
    66 00000030 F7FF FFFE       BL               PortA_Output
    67 00000034 F04F 0906       MOV              R9, #2_0110 ; PQ (dcba = 0110)
    68 00000038 F7FF FFFE       BL               PortQ_Output
-   69 0000003C E074            B                FimAcende
+   69 0000003C E099            B                FimAcende
    70 0000003E         
    71 0000003E         Acende2Display                       ; Acende segmentos:
                                                              a, b, d, e, g
@@ -116,7 +116,7 @@ ARM Macro Assembler    Page 2
    73 00000042 F7FF FFFE       BL               PortA_Output
    74 00000046 F04F 090B       MOV              R9, #2_1011 ; PQ (dcba = 1011)
    75 0000004A F7FF FFFE       BL               PortQ_Output
-   76 0000004E E06B            B                FimAcende
+   76 0000004E E090            B                FimAcende
    77 00000050         
    78 00000050         Acende3Display                       ; Acende segmentos:
                                                              a, b, c, d, g
@@ -125,7 +125,7 @@ ARM Macro Assembler    Page 2
    80 00000054 F7FF FFFE       BL               PortA_Output
    81 00000058 F04F 090F       MOV              R9, #2_1111 ; PQ (dcba = 1111)
    82 0000005C F7FF FFFE       BL               PortQ_Output
-   83 00000060 E062            B                FimAcende
+   83 00000060 E087            B                FimAcende
    84 00000062         
    85 00000062         Acende4Display                       ; Acende segmentos:
 
@@ -137,263 +137,286 @@ ARM Macro Assembler    Page 3
                                                              b, c, f, g
    86 00000062 F04F 0960       MOV              R9, #2_1100000 ; PA (gfe = 110)
                                                             
-   87 00000066 F04F 0906       MOV              R9, #2_0110 ; PQ (dcba = 0110)
-   88 0000006A F7FF FFFE       BL               PortQ_Output
-   89 0000006E E05B            B                FimAcende
-   90 00000070         
-   91 00000070         Acende5Display                       ; Acende segmentos:
+   87 00000066 F7FF FFFE       BL               PortA_Output
+   88 0000006A F04F 0906       MOV              R9, #2_0110 ; PQ (dcba = 0110)
+   89 0000006E F7FF FFFE       BL               PortQ_Output
+   90 00000072 E07E            B                FimAcende
+   91 00000074         
+   92 00000074         Acende5Display                       ; Acende segmentos:
                                                              a, c, d, f, g
-   92 00000070 F04F 0960       MOV              R9, #2_1100000 ; PA (gfe = 110)
+   93 00000074 F04F 0960       MOV              R9, #2_1100000 ; PA (gfe = 110)
                                                             
-   93 00000074 F7FF FFFE       BL               PortA_Output
-   94 00000078 F04F 090D       MOV              R9, #2_1101 ; PQ (dcba = 1101)
-   95 0000007C F7FF FFFE       BL               PortQ_Output
-   96 00000080 E052            B                FimAcende
-   97 00000082         
-   98 00000082         Acende6Display                       ; Acende segmentos:
+   94 00000078 F7FF FFFE       BL               PortA_Output
+   95 0000007C F04F 090D       MOV              R9, #2_1101 ; PQ (dcba = 1101)
+   96 00000080 F7FF FFFE       BL               PortQ_Output
+   97 00000084 E075            B                FimAcende
+   98 00000086         
+   99 00000086         Acende6Display                       ; Acende segmentos:
                                                              a, c, d, e, f, g
-   99 00000082 F04F 0970       MOV              R9, #2_1110000 ; PA (gfe = 111)
+  100 00000086 F04F 0970       MOV              R9, #2_1110000 ; PA (gfe = 111)
                                                             
-  100 00000086 F7FF FFFE       BL               PortA_Output
-  101 0000008A F04F 090D       MOV              R9, #2_1101 ; PQ (dcba = 1101)
-  102 0000008E F7FF FFFE       BL               PortQ_Output
-  103 00000092 E049            B                FimAcende
-  104 00000094         
-  105 00000094         Acende7Display                       ; Acende segmentos:
+  101 0000008A F7FF FFFE       BL               PortA_Output
+  102 0000008E F04F 090D       MOV              R9, #2_1101 ; PQ (dcba = 1101)
+  103 00000092 F7FF FFFE       BL               PortQ_Output
+  104 00000096 E06C            B                FimAcende
+  105 00000098         
+  106 00000098         Acende7Display                       ; Acende segmentos:
                                                              a, b, c
-  106 00000094 F04F 0900       MOV              R9, #2_0000000 ; PA (gfe = 000)
+  107 00000098 F04F 0900       MOV              R9, #2_0000000 ; PA (gfe = 000)
                                                             
-  107 00000098 F7FF FFFE       BL               PortA_Output
-  108 0000009C F04F 0907       MOV              R9, #2_0111 ; PQ (dcba = 0111)
-  109 000000A0 F7FF FFFE       BL               PortQ_Output
-  110 000000A4 E040            B                FimAcende
-  111 000000A6         
-  112 000000A6         Acende8Display                       ; Acende segmentos:
+  108 0000009C F7FF FFFE       BL               PortA_Output
+  109 000000A0 F04F 0907       MOV              R9, #2_0111 ; PQ (dcba = 0111)
+  110 000000A4 F7FF FFFE       BL               PortQ_Output
+  111 000000A8 E063            B                FimAcende
+  112 000000AA         
+  113 000000AA         Acende8Display                       ; Acende segmentos:
                                                              a, b, c, d, e, f, 
                                                             g
-  113 000000A6 F04F 0970       MOV              R9, #2_1110000 ; PA (gfe = 111)
+  114 000000AA F04F 0970       MOV              R9, #2_1110000 ; PA (gfe = 111)
                                                             
-  114 000000AA F7FF FFFE       BL               PortA_Output
-  115 000000AE F04F 090F       MOV              R9, #2_1111 ; PQ (dcba = 1111)
-  116 000000B2 F7FF FFFE       BL               PortQ_Output
-  117 000000B6 E037            B                FimAcende
-  118 000000B8         
-  119 000000B8         Acende9Display                       ; Acende segmentos:
+  115 000000AE F7FF FFFE       BL               PortA_Output
+  116 000000B2 F04F 090F       MOV              R9, #2_1111 ; PQ (dcba = 1111)
+  117 000000B6 F7FF FFFE       BL               PortQ_Output
+  118 000000BA E05A            B                FimAcende
+  119 000000BC         
+  120 000000BC         Acende9Display                       ; Acende segmentos:
                                                              a, b, c, d, f, g
-  120 000000B8 F04F 0960       MOV              R9, #2_1100000 ; PA (gfe = 110)
+  121 000000BC F04F 0960       MOV              R9, #2_1100000 ; PA (gfe = 110)
                                                             
-  121 000000BC F7FF FFFE       BL               PortA_Output
-  122 000000C0 F04F 090F       MOV              R9, #2_1111 ; PQ (dcba = 1111)
-  123 000000C4 F7FF FFFE       BL               PortQ_Output
-  124 000000C8 E02E            B                FimAcende
-  125 000000CA         
-  126 000000CA         MainLoop
-  127 000000CA         ; Recebe um número no R10 e mostra nos displays de 7 se
+  122 000000C0 F7FF FFFE       BL               PortA_Output
+  123 000000C4 F04F 090F       MOV              R9, #2_1111 ; PQ (dcba = 1111)
+  124 000000C8 F7FF FFFE       BL               PortQ_Output
+  125 000000CC E051            B                FimAcende
+  126 000000CE         
+  127 000000CE         MainLoop
+  128 000000CE         ; Recebe um número no R10 e mostra nos displays de 7 se
                        gmentos
-  128 000000CA F04F 010A       MOV              R1, #10
-  129 000000CE FBBA F0F1       UDIV             R0, R10, R1 ; R0 = R10 / 10
-  130 000000D2         
+  129 000000CE F04F 010A       MOV              R1, #10
+  130 000000D2 FBBA F0F1       UDIV             R0, R10, R1 ; R0 = R10 / 10
 
 
 
 ARM Macro Assembler    Page 4 
 
 
-  131 000000D2 FB00 A111       MLS              R1, R0, R1, R10 ; R1 = R10 - R0
+  131 000000D6         
+  132 000000D6 FB00 A111       MLS              R1, R0, R1, R10 ; R1 = R10 - R0
                                                              * 10
-  132 000000D6         ; R0 = dezena, R1 = unidade
-  133 000000D6         
-  134 000000D6 F106 0601       ADD              R6, R6, #1
-  135 000000DA F5B6 7FC8       CMP              R6, #400
-  136 000000DE DB08            BLT              PulaTempo
-  137 000000E0         ; A cada 1 segundo ajusta a temperatura
-  138 000000E0 F04F 0600       MOV              R6, #0
-  139 000000E4 45DA            CMP              R10, R11
-  140 000000E6 DB02            BLT              aumenta
-  141 000000E8 F1AA 0A01       SUB              R10, R10, #1
-  142 000000EC E001            B                PulaTempo
-  143 000000EE         aumenta
-  144 000000EE F10A 0A01       ADD              R10, R10, #1
-  145 000000F2         PulaTempo
-  146 000000F2         
-  147 000000F2         
-  148 000000F2         AcendeDisplay
-  149 000000F2         
-  150 000000F2 F1B8 0F01       CMP              R8, #1
-  151 000000F6 D001            BEQ              unidade
-  152 000000F8         ;BGT acendeLEDs
-  153 000000F8 4607            MOV              R7, R0
-  154 000000FA E000            B                dezena
-  155 000000FC         unidade
-  156 000000FC 460F            MOV              R7, R1
-  157 000000FE         dezena
-  158 000000FE         
-  159 000000FE 2F00            CMP              R7, #0
-  160 00000100 D08B            BEQ              Acende0Display
-  161 00000102 2F01            CMP              R7, #1
-  162 00000104 D092            BEQ              Acende1Display
-  163 00000106 2F02            CMP              R7, #2
-  164 00000108 D099            BEQ              Acende2Display
-  165 0000010A 2F03            CMP              R7, #3
-  166 0000010C D0A0            BEQ              Acende3Display
-  167 0000010E 2F04            CMP              R7, #4
-  168 00000110 D0A7            BEQ              Acende4Display
-  169 00000112 2F05            CMP              R7, #5
-  170 00000114 D0AC            BEQ              Acende5Display
-  171 00000116 2F06            CMP              R7, #6
-  172 00000118 D0B3            BEQ              Acende6Display
-  173 0000011A 2F07            CMP              R7, #7
-  174 0000011C D0BA            BEQ              Acende7Display
-  175 0000011E 2F08            CMP              R7, #8
-  176 00000120 D0C1            BEQ              Acende8Display
-  177 00000122 2F09            CMP              R7, #9
-  178 00000124 D0C8            BEQ              Acende9Display
-  179 00000126 E004            B                FimAcendeDezena
-  180 00000128         
-  181 00000128         FimAcende
-  182 00000128         ; Verifica se a unidade ou a dezena deve ser acesa
-  183 00000128 F1B8 0F01       CMP              R8, #1
-  184 0000012C D014            BEQ              FimAcendeUnidade
-  185 0000012E DB00            BLT              FimAcendeDezena
-  186 00000130 E025            B                FimAcendeLEDs
-  187 00000132         
-  188 00000132         FimAcendeDezena
+  133 000000DA         ; R0 = dezena, R1 = unidade
+  134 000000DA         
+  135 000000DA F106 0601       ADD              R6, R6, #1
+  136 000000DE F5B6 7FC8       CMP              R6, #400
+  137 000000E2 DB1F            BLT              PulaTempo
+  138 000000E4         ; A cada 1 segundo ajusta a temperatura
+  139 000000E4 F04F 0600       MOV              R6, #0
+  140 000000E8 45DA            CMP              R10, R11
+  141 000000EA DB12            BLT              aumenta
+  142 000000EC DC07            BGT              diminui
+  143 000000EE         ; igual
+  144 000000EE F04F 0903       MOV              R9, #2_11
+  145 000000F2 B500            PUSH             {LR}
+  146 000000F4 F7FF FFFE       BL               PortN_Output
+  147 000000F8 F85D EB04       POP              {LR}
+  148 000000FC E012            B                PulaTempo
+  149 000000FE         diminui
+  150 000000FE F04F 0902       MOV              R9, #2_10
+  151 00000102 B500            PUSH             {LR}
+  152 00000104 F7FF FFFE       BL               PortN_Output
+  153 00000108 F85D EB04       POP              {LR}
+  154 0000010C F1AA 0A01       SUB              R10, R10, #1
+  155 00000110 E008            B                PulaTempo
+  156 00000112         aumenta
+  157 00000112 F04F 0901       MOV              R9, #2_1
+  158 00000116 B500            PUSH             {LR}
+  159 00000118 F7FF FFFE       BL               PortN_Output
+  160 0000011C F85D EB04       POP              {LR}
+  161 00000120 F10A 0A01       ADD              R10, R10, #1
+  162 00000124         PulaTempo
+  163 00000124         
+  164 00000124         
+  165 00000124         AcendeDisplay
+  166 00000124         
+  167 00000124 F1B8 0F01       CMP              R8, #1
+  168 00000128 D002            BEQ              unidade
+  169 0000012A DC19            BGT              acendeLEDs
+  170 0000012C 4607            MOV              R7, R0
+  171 0000012E E000            B                dezena
+  172 00000130         unidade
+  173 00000130 460F            MOV              R7, R1
+  174 00000132         dezena
+  175 00000132         
+  176 00000132 2F00            CMP              R7, #0
+  177 00000134 F43F AF71       BEQ              Acende0Display
+  178 00000138 2F01            CMP              R7, #1
+  179 0000013A F43F AF77       BEQ              Acende1Display
+  180 0000013E 2F02            CMP              R7, #2
+  181 00000140 F43F AF7D       BEQ              Acende2Display
+  182 00000144 2F03            CMP              R7, #3
+  183 00000146 D083            BEQ              Acende3Display
+  184 00000148 2F04            CMP              R7, #4
+  185 0000014A D08A            BEQ              Acende4Display
+  186 0000014C 2F05            CMP              R7, #5
+  187 0000014E D091            BEQ              Acende5Display
+  188 00000150 2F06            CMP              R7, #6
 
 
 
 ARM Macro Assembler    Page 5 
 
 
-  189 00000132         ; Liga transistor da dezena (Q2)
-  190 00000132 F000 F83F       BL               HabilitarDisplayDezena
-  191 00000136         
-  192 00000136 B401            PUSH             {R0}
-  193 00000138 F04F 0001       MOV              R0, #1
-  194 0000013C F7FF FFFE       BL               SysTick_Wait1ms
-  195 00000140 BC01            POP              {R0}
-  196 00000142         
-  197 00000142         ; Desliga transistor da dezena (Q2)
-  198 00000142 F000 F847       BL               DesabilitarDisplayDezena
-  199 00000146         
-  200 00000146 B401            PUSH             {R0}
-  201 00000148 F04F 0001       MOV              R0, #1
-  202 0000014C F7FF FFFE       BL               SysTick_Wait1ms
-  203 00000150 BC01            POP              {R0}
-  204 00000152         
-  205 00000152 F108 0801       ADD              R8, #1
-  206 00000156         
-  207 00000156 E7B8            B                MainLoop
-  208 00000158         
-  209 00000158         FimAcendeUnidade
-  210 00000158         ; Liga transistor da unidade (Q1)
-  211 00000158 F000 F824       BL               HabilitarDisplayUnidade
-  212 0000015C         
-  213 0000015C B401            PUSH             {R0}
-  214 0000015E F04F 0001       MOV              R0, #1
-  215 00000162 F7FF FFFE       BL               SysTick_Wait1ms
-  216 00000166 BC01            POP              {R0}
-  217 00000168         
-  218 00000168         ; Desliga transistor da unidade (Q1)
-  219 00000168 F000 F82C       BL               DesabilitarDisplayUnidade
-  220 0000016C         
-  221 0000016C B401            PUSH             {R0}
-  222 0000016E F04F 0001       MOV              R0, #1
-  223 00000172 F7FF FFFE       BL               SysTick_Wait1ms
-  224 00000176 BC01            POP              {R0}
-  225 00000178         
-  226 00000178 F108 0801       ADD              R8, #1
-  227 0000017C         
-  228 0000017C E7A5            B                MainLoop
-  229 0000017E         
-  230 0000017E         FimAcendeLEDs
-  231 0000017E         ; Liga transistor da unidade (Q0)
-  232 0000017E F000 F831       BL               HabilitarLEDs
-  233 00000182         
-  234 00000182 B401            PUSH             {R0}
-  235 00000184 F04F 0001       MOV              R0, #1
-  236 00000188 F7FF FFFE       BL               SysTick_Wait1ms
-  237 0000018C BC01            POP              {R0}
-  238 0000018E         
-  239 0000018E         ; Desliga transistor da unidade (Q0)
-  240 0000018E F000 F831       BL               DesabilitarLEDs
-  241 00000192         
-  242 00000192 B401            PUSH             {R0}
-  243 00000194 F04F 0001       MOV              R0, #1
-  244 00000198 F7FF FFFE       BL               SysTick_Wait1ms
-  245 0000019C BC01            POP              {R0}
-  246 0000019E         
-  247 0000019E F04F 0800       MOV              R8, #0
+  189 00000152 D098            BEQ              Acende6Display
+  190 00000154 2F07            CMP              R7, #7
+  191 00000156 D09F            BEQ              Acende7Display
+  192 00000158 2F08            CMP              R7, #8
+  193 0000015A D0A6            BEQ              Acende8Display
+  194 0000015C 2F09            CMP              R7, #9
+  195 0000015E D0AD            BEQ              Acende9Display
+  196 00000160         
+  197 00000160         acendeLEDs
+  198 00000160 F02B 090F       BIC              R9, R11, #2_00001111
+  199 00000164 F7FF FFFE       BL               PortA_Output
+  200 00000168 F00B 090F       AND              R9, R11, #2_00001111
+  201 0000016C F7FF FFFE       BL               PortQ_Output
+  202 00000170 E7FF            B                FimAcende
+  203 00000172         
+  204 00000172         FimAcende
+  205 00000172         ; Verifica se a unidade ou a dezena deve ser acesa
+  206 00000172 F1B8 0F01       CMP              R8, #1
+  207 00000176 D014            BEQ              FimAcendeUnidade
+  208 00000178 DB00            BLT              FimAcendeDezena
+  209 0000017A E025            B                FimAcendeLEDs
+  210 0000017C         
+  211 0000017C         FimAcendeDezena
+  212 0000017C         ; Liga transistor da dezena (Q2)
+  213 0000017C F000 F83F       BL               HabilitarDisplayDezena
+  214 00000180         
+  215 00000180 B401            PUSH             {R0}
+  216 00000182 F04F 0001       MOV              R0, #1
+  217 00000186 F7FF FFFE       BL               SysTick_Wait1ms
+  218 0000018A BC01            POP              {R0}
+  219 0000018C         
+  220 0000018C         ; Desliga transistor da dezena (Q2)
+  221 0000018C F000 F847       BL               DesabilitarDisplayDezena
+  222 00000190         
+  223 00000190 B401            PUSH             {R0}
+  224 00000192 F04F 0001       MOV              R0, #1
+  225 00000196 F7FF FFFE       BL               SysTick_Wait1ms
+  226 0000019A BC01            POP              {R0}
+  227 0000019C         
+  228 0000019C F108 0801       ADD              R8, #1
+  229 000001A0         
+  230 000001A0 E795            B                MainLoop
+  231 000001A2         
+  232 000001A2         FimAcendeUnidade
+  233 000001A2         ; Liga transistor da unidade (Q1)
+  234 000001A2 F000 F824       BL               HabilitarDisplayUnidade
+  235 000001A6         
+  236 000001A6 B401            PUSH             {R0}
+  237 000001A8 F04F 0001       MOV              R0, #1
+  238 000001AC F7FF FFFE       BL               SysTick_Wait1ms
+  239 000001B0 BC01            POP              {R0}
+  240 000001B2         
+  241 000001B2         ; Desliga transistor da unidade (Q1)
+  242 000001B2 F000 F82C       BL               DesabilitarDisplayUnidade
+  243 000001B6         
+  244 000001B6 B401            PUSH             {R0}
+  245 000001B8 F04F 0001       MOV              R0, #1
+  246 000001BC F7FF FFFE       BL               SysTick_Wait1ms
+  247 000001C0 BC01            POP              {R0}
 
 
 
 ARM Macro Assembler    Page 6 
 
 
-  248 000001A2         
-  249 000001A2 E792            B                MainLoop
-  250 000001A4         
-  251 000001A4         HabilitarDisplayUnidade
-  252 000001A4         ; Atualiza transistor
-  253 000001A4 F04F 0920       MOV              R9, #2_00100000 ; PB
-  254 000001A8 B500            PUSH             { LR }
-  255 000001AA F7FF FFFE       BL               PortB_Output
-  256 000001AE F85D EB04       POP              { LR }
-  257 000001B2 4770            BX               LR
-  258 000001B4         
-  259 000001B4         HabilitarDisplayDezena
-  260 000001B4         ; Atualiza transistor
-  261 000001B4 F04F 0910       MOV              R9, #2_00010000 ; PB
-  262 000001B8 B500            PUSH             { LR }
-  263 000001BA F7FF FFFE       BL               PortB_Output
-  264 000001BE F85D EB04       POP              { LR }
-  265 000001C2 4770            BX               LR
-  266 000001C4         
-  267 000001C4         DesabilitarDisplayUnidade
-  268 000001C4         ; Atualiza transistor
-  269 000001C4 F04F 09CF       MOV              R9, #2_11001111 ; PB
-  270 000001C8 B500            PUSH             { LR }
-  271 000001CA F7FF FFFE       BL               PortB_Output
-  272 000001CE F85D EB04       POP              { LR }
-  273 000001D2 4770            BX               LR
-  274 000001D4         
-  275 000001D4         DesabilitarDisplayDezena
-  276 000001D4         ; Atualiza transistor
-  277 000001D4 F04F 09CF       MOV              R9, #2_11001111 ; PB
-  278 000001D8 B500            PUSH             { LR }
-  279 000001DA F7FF FFFE       BL               PortB_Output
-  280 000001DE F85D EB04       POP              { LR }
-  281 000001E2 4770            BX               LR
-  282 000001E4         
-  283 000001E4         HabilitarLEDs
-  284 000001E4         ; Atualiza transistor
-  285 000001E4 F04F 0920       MOV              R9, #2_00100000 ; PB
-  286 000001E8 B500            PUSH             { LR }
-  287 000001EA F7FF FFFE       BL               PortP_Output
-  288 000001EE F85D EB04       POP              { LR }
-  289 000001F2 4770            BX               LR
-  290 000001F4         
-  291 000001F4         DesabilitarLEDs
-  292 000001F4         ; Atualiza transistor
-  293 000001F4 F04F 09DF       MOV              R9, #2_11011111 ; PB
-  294 000001F8 B500            PUSH             { LR }
-  295 000001FA F7FF FFFE       BL               PortP_Output
-  296 000001FE F85D EB04       POP              { LR }
-  297 00000202 4770            BX               LR
-  298 00000204         
-  299 00000204                 ALIGN                        ;Garante que o fim 
-                                                            da se��o est�
-                                                             alinhada 
-  300 00000204                 END                          ;Fim do arquivo
-Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp.sp --apcs=
-interwork --depend=.\objects\main.d -o.\objects\main.o -IC:\Users\Nix\AppData\L
-ocal\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129 --predefine="__EVAL S
-ETA 1" --predefine="__UVISION_VERSION SETA 536" --predefine="TM4C1294NCPDT SETA
+  248 000001C2         
+  249 000001C2 F108 0801       ADD              R8, #1
+  250 000001C6         
+  251 000001C6 E782            B                MainLoop
+  252 000001C8         
+  253 000001C8         FimAcendeLEDs
+  254 000001C8         ; Liga transistor da unidade (Q0)
+  255 000001C8 F000 F831       BL               HabilitarLEDs
+  256 000001CC         
+  257 000001CC B401            PUSH             {R0}
+  258 000001CE F04F 0001       MOV              R0, #1
+  259 000001D2 F7FF FFFE       BL               SysTick_Wait1ms
+  260 000001D6 BC01            POP              {R0}
+  261 000001D8         
+  262 000001D8         ; Desliga transistor da unidade (Q0)
+  263 000001D8 F000 F831       BL               DesabilitarLEDs
+  264 000001DC         
+  265 000001DC B401            PUSH             {R0}
+  266 000001DE F04F 0001       MOV              R0, #1
+  267 000001E2 F7FF FFFE       BL               SysTick_Wait1ms
+  268 000001E6 BC01            POP              {R0}
+  269 000001E8         
+  270 000001E8 F04F 0800       MOV              R8, #0
+  271 000001EC         
+  272 000001EC E76F            B                MainLoop
+  273 000001EE         
+  274 000001EE         HabilitarDisplayUnidade
+  275 000001EE         ; Atualiza transistor
+  276 000001EE F04F 0920       MOV              R9, #2_00100000 ; PB
+  277 000001F2 B500            PUSH             { LR }
+  278 000001F4 F7FF FFFE       BL               PortB_Output
+  279 000001F8 F85D EB04       POP              { LR }
+  280 000001FC 4770            BX               LR
+  281 000001FE         
+  282 000001FE         HabilitarDisplayDezena
+  283 000001FE         ; Atualiza transistor
+  284 000001FE F04F 0910       MOV              R9, #2_00010000 ; PB
+  285 00000202 B500            PUSH             { LR }
+  286 00000204 F7FF FFFE       BL               PortB_Output
+  287 00000208 F85D EB04       POP              { LR }
+  288 0000020C 4770            BX               LR
+  289 0000020E         
+  290 0000020E         DesabilitarDisplayUnidade
+  291 0000020E         ; Atualiza transistor
+  292 0000020E F04F 09CF       MOV              R9, #2_11001111 ; PB
+  293 00000212 B500            PUSH             { LR }
+  294 00000214 F7FF FFFE       BL               PortB_Output
+  295 00000218 F85D EB04       POP              { LR }
+  296 0000021C 4770            BX               LR
+  297 0000021E         
+  298 0000021E         DesabilitarDisplayDezena
+  299 0000021E         ; Atualiza transistor
+  300 0000021E F04F 09CF       MOV              R9, #2_11001111 ; PB
+  301 00000222 B500            PUSH             { LR }
+  302 00000224 F7FF FFFE       BL               PortB_Output
+  303 00000228 F85D EB04       POP              { LR }
+  304 0000022C 4770            BX               LR
+  305 0000022E         
+  306 0000022E         HabilitarLEDs
 
 
 
 ARM Macro Assembler    Page 7 
 
 
+  307 0000022E         ; Atualiza transistor
+  308 0000022E F04F 0920       MOV              R9, #2_00100000 ; PB
+  309 00000232 B500            PUSH             { LR }
+  310 00000234 F7FF FFFE       BL               PortP_Output
+  311 00000238 F85D EB04       POP              { LR }
+  312 0000023C 4770            BX               LR
+  313 0000023E         
+  314 0000023E         DesabilitarLEDs
+  315 0000023E         ; Atualiza transistor
+  316 0000023E F04F 09DF       MOV              R9, #2_11011111 ; PB
+  317 00000242 B500            PUSH             { LR }
+  318 00000244 F7FF FFFE       BL               PortP_Output
+  319 00000248 F85D EB04       POP              { LR }
+  320 0000024C 4770            BX               LR
+  321 0000024E         
+  322 0000024E 00 00           ALIGN                        ;Garante que o fim 
+                                                            da se��o est�
+                                                             alinhada 
+  323 00000250                 END                          ;Fim do arquivo
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp.sp --apcs=
+interwork --depend=.\objects\main.d -o.\objects\main.o -IC:\Users\Nix\AppData\L
+ocal\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129 --predefine="__EVAL S
+ETA 1" --predefine="__UVISION_VERSION SETA 536" --predefine="TM4C1294NCPDT SETA
  1" --list=.\listings\main.lst main.s
 
 
@@ -430,7 +453,7 @@ Symbol: Acende0Display
    Definitions
       At line 57 in file main.s
    Uses
-      At line 160 in file main.s
+      At line 177 in file main.s
 Comment: Acende0Display used once
 Acende1Display 0000002C
 
@@ -438,7 +461,7 @@ Symbol: Acende1Display
    Definitions
       At line 64 in file main.s
    Uses
-      At line 162 in file main.s
+      At line 179 in file main.s
 Comment: Acende1Display used once
 Acende2Display 0000003E
 
@@ -446,7 +469,7 @@ Symbol: Acende2Display
    Definitions
       At line 71 in file main.s
    Uses
-      At line 164 in file main.s
+      At line 181 in file main.s
 Comment: Acende2Display used once
 Acende3Display 00000050
 
@@ -454,7 +477,7 @@ Symbol: Acende3Display
    Definitions
       At line 78 in file main.s
    Uses
-      At line 166 in file main.s
+      At line 183 in file main.s
 Comment: Acende3Display used once
 Acende4Display 00000062
 
@@ -462,17 +485,17 @@ Symbol: Acende4Display
    Definitions
       At line 85 in file main.s
    Uses
-      At line 168 in file main.s
+      At line 185 in file main.s
 Comment: Acende4Display used once
-Acende5Display 00000070
+Acende5Display 00000074
 
 Symbol: Acende5Display
    Definitions
-      At line 91 in file main.s
+      At line 92 in file main.s
    Uses
-      At line 170 in file main.s
+      At line 187 in file main.s
 Comment: Acende5Display used once
-Acende6Display 00000082
+Acende6Display 00000086
 
 Symbol: Acende6Display
 
@@ -482,63 +505,63 @@ ARM Macro Assembler    Page 2 Alphabetic symbol ordering
 Relocatable symbols
 
    Definitions
-      At line 98 in file main.s
+      At line 99 in file main.s
    Uses
-      At line 172 in file main.s
+      At line 189 in file main.s
 Comment: Acende6Display used once
-Acende7Display 00000094
+Acende7Display 00000098
 
 Symbol: Acende7Display
    Definitions
-      At line 105 in file main.s
+      At line 106 in file main.s
    Uses
-      At line 174 in file main.s
+      At line 191 in file main.s
 Comment: Acende7Display used once
-Acende8Display 000000A6
+Acende8Display 000000AA
 
 Symbol: Acende8Display
    Definitions
-      At line 112 in file main.s
+      At line 113 in file main.s
    Uses
-      At line 176 in file main.s
+      At line 193 in file main.s
 Comment: Acende8Display used once
-Acende9Display 000000B8
+Acende9Display 000000BC
 
 Symbol: Acende9Display
    Definitions
-      At line 119 in file main.s
+      At line 120 in file main.s
    Uses
-      At line 178 in file main.s
+      At line 195 in file main.s
 Comment: Acende9Display used once
-AcendeDisplay 000000F2
+AcendeDisplay 00000124
 
 Symbol: AcendeDisplay
    Definitions
-      At line 148 in file main.s
+      At line 165 in file main.s
    Uses
       None
 Comment: AcendeDisplay unused
-DesabilitarDisplayDezena 000001D4
+DesabilitarDisplayDezena 0000021E
 
 Symbol: DesabilitarDisplayDezena
    Definitions
-      At line 275 in file main.s
+      At line 298 in file main.s
    Uses
-      At line 198 in file main.s
+      At line 221 in file main.s
 Comment: DesabilitarDisplayDezena used once
-DesabilitarDisplayUnidade 000001C4
+DesabilitarDisplayUnidade 0000020E
 
 Symbol: DesabilitarDisplayUnidade
    Definitions
-      At line 267 in file main.s
+      At line 290 in file main.s
    Uses
-      At line 219 in file main.s
+      At line 242 in file main.s
 Comment: DesabilitarDisplayUnidade used once
-DesabilitarLEDs 000001F4
+DesabilitarLEDs 0000023E
 
 Symbol: DesabilitarLEDs
    Definitions
-      At line 291 in file main.s
+      At line 314 in file main.s
    Uses
 
 
@@ -546,65 +569,65 @@ Symbol: DesabilitarLEDs
 ARM Macro Assembler    Page 3 Alphabetic symbol ordering
 Relocatable symbols
 
-      At line 240 in file main.s
+      At line 263 in file main.s
 Comment: DesabilitarLEDs used once
-FimAcende 00000128
+FimAcende 00000172
 
 Symbol: FimAcende
    Definitions
-      At line 181 in file main.s
+      At line 204 in file main.s
    Uses
       At line 62 in file main.s
       At line 69 in file main.s
       At line 76 in file main.s
       At line 83 in file main.s
-      At line 89 in file main.s
-      At line 96 in file main.s
-      At line 103 in file main.s
-      At line 110 in file main.s
-      At line 117 in file main.s
-      At line 124 in file main.s
+      At line 90 in file main.s
+      At line 97 in file main.s
+      At line 104 in file main.s
+      At line 111 in file main.s
+      At line 118 in file main.s
+      At line 125 in file main.s
+      At line 202 in file main.s
 
-FimAcendeDezena 00000132
+FimAcendeDezena 0000017C
 
 Symbol: FimAcendeDezena
    Definitions
-      At line 188 in file main.s
+      At line 211 in file main.s
    Uses
-      At line 179 in file main.s
-      At line 185 in file main.s
-
-FimAcendeLEDs 0000017E
+      At line 208 in file main.s
+Comment: FimAcendeDezena used once
+FimAcendeLEDs 000001C8
 
 Symbol: FimAcendeLEDs
    Definitions
-      At line 230 in file main.s
+      At line 253 in file main.s
    Uses
-      At line 186 in file main.s
+      At line 209 in file main.s
 Comment: FimAcendeLEDs used once
-FimAcendeUnidade 00000158
+FimAcendeUnidade 000001A2
 
 Symbol: FimAcendeUnidade
    Definitions
-      At line 209 in file main.s
+      At line 232 in file main.s
    Uses
-      At line 184 in file main.s
+      At line 207 in file main.s
 Comment: FimAcendeUnidade used once
-HabilitarDisplayDezena 000001B4
+HabilitarDisplayDezena 000001FE
 
 Symbol: HabilitarDisplayDezena
    Definitions
-      At line 259 in file main.s
+      At line 282 in file main.s
    Uses
-      At line 190 in file main.s
+      At line 213 in file main.s
 Comment: HabilitarDisplayDezena used once
-HabilitarDisplayUnidade 000001A4
+HabilitarDisplayUnidade 000001EE
 
 Symbol: HabilitarDisplayUnidade
    Definitions
-      At line 251 in file main.s
+      At line 274 in file main.s
    Uses
-      At line 211 in file main.s
+      At line 234 in file main.s
 
 
 
@@ -612,33 +635,34 @@ ARM Macro Assembler    Page 4 Alphabetic symbol ordering
 Relocatable symbols
 
 Comment: HabilitarDisplayUnidade used once
-HabilitarLEDs 000001E4
+HabilitarLEDs 0000022E
 
 Symbol: HabilitarLEDs
    Definitions
-      At line 283 in file main.s
+      At line 306 in file main.s
    Uses
-      At line 232 in file main.s
+      At line 255 in file main.s
 Comment: HabilitarLEDs used once
-MainLoop 000000CA
+MainLoop 000000CE
 
 Symbol: MainLoop
    Definitions
-      At line 126 in file main.s
+      At line 127 in file main.s
    Uses
       At line 55 in file main.s
-      At line 207 in file main.s
-      At line 228 in file main.s
-      At line 249 in file main.s
+      At line 230 in file main.s
+      At line 251 in file main.s
+      At line 272 in file main.s
 
-PulaTempo 000000F2
+PulaTempo 00000124
 
 Symbol: PulaTempo
    Definitions
-      At line 145 in file main.s
+      At line 162 in file main.s
    Uses
-      At line 136 in file main.s
-      At line 142 in file main.s
+      At line 137 in file main.s
+      At line 148 in file main.s
+      At line 155 in file main.s
 
 Start 00000000
 
@@ -648,37 +672,53 @@ Symbol: Start
    Uses
       At line 30 in file main.s
 Comment: Start used once
-aumenta 000000EE
+acendeLEDs 00000160
+
+Symbol: acendeLEDs
+   Definitions
+      At line 197 in file main.s
+   Uses
+      At line 169 in file main.s
+Comment: acendeLEDs used once
+aumenta 00000112
 
 Symbol: aumenta
    Definitions
-      At line 143 in file main.s
+      At line 156 in file main.s
    Uses
-      At line 140 in file main.s
+      At line 141 in file main.s
 Comment: aumenta used once
-dezena 000000FE
+dezena 00000132
 
 Symbol: dezena
    Definitions
-      At line 157 in file main.s
-   Uses
-      At line 154 in file main.s
-Comment: dezena used once
-unidade 000000FC
-
-Symbol: unidade
-   Definitions
-      At line 155 in file main.s
-   Uses
+      At line 174 in file main.s
 
 
 
 ARM Macro Assembler    Page 5 Alphabetic symbol ordering
 Relocatable symbols
 
-      At line 151 in file main.s
+   Uses
+      At line 171 in file main.s
+Comment: dezena used once
+diminui 000000FE
+
+Symbol: diminui
+   Definitions
+      At line 149 in file main.s
+   Uses
+      At line 142 in file main.s
+Comment: diminui used once
+unidade 00000130
+
+Symbol: unidade
+   Definitions
+      At line 172 in file main.s
+   Uses
+      At line 168 in file main.s
 Comment: unidade used once
-28 symbols
+30 symbols
 
 
 
@@ -711,11 +751,13 @@ Symbol: PortA_Output
       At line 66 in file main.s
       At line 73 in file main.s
       At line 80 in file main.s
-      At line 93 in file main.s
-      At line 100 in file main.s
-      At line 107 in file main.s
-      At line 114 in file main.s
-      At line 121 in file main.s
+      At line 87 in file main.s
+      At line 94 in file main.s
+      At line 101 in file main.s
+      At line 108 in file main.s
+      At line 115 in file main.s
+      At line 122 in file main.s
+      At line 199 in file main.s
 
 PortB_Output 00000000
 
@@ -723,10 +765,10 @@ Symbol: PortB_Output
    Definitions
       At line 43 in file main.s
    Uses
-      At line 255 in file main.s
-      At line 263 in file main.s
-      At line 271 in file main.s
-      At line 279 in file main.s
+      At line 278 in file main.s
+      At line 286 in file main.s
+      At line 294 in file main.s
+      At line 302 in file main.s
 
 PortN_Output 00000000
 
@@ -734,22 +776,24 @@ Symbol: PortN_Output
    Definitions
       At line 40 in file main.s
    Uses
-      None
-Comment: PortN_Output unused
+      At line 146 in file main.s
+      At line 152 in file main.s
+      At line 159 in file main.s
+
 PortP_Output 00000000
 
 Symbol: PortP_Output
    Definitions
-      At line 44 in file main.s
-   Uses
-      At line 287 in file main.s
-      At line 295 in file main.s
 
 
 
 ARM Macro Assembler    Page 2 Alphabetic symbol ordering
 External symbols
 
+      At line 44 in file main.s
+   Uses
+      At line 310 in file main.s
+      At line 318 in file main.s
 
 PortQ_Output 00000000
 
@@ -761,12 +805,13 @@ Symbol: PortQ_Output
       At line 68 in file main.s
       At line 75 in file main.s
       At line 82 in file main.s
-      At line 88 in file main.s
-      At line 95 in file main.s
-      At line 102 in file main.s
-      At line 109 in file main.s
-      At line 116 in file main.s
-      At line 123 in file main.s
+      At line 89 in file main.s
+      At line 96 in file main.s
+      At line 103 in file main.s
+      At line 110 in file main.s
+      At line 117 in file main.s
+      At line 124 in file main.s
+      At line 201 in file main.s
 
 SysTick_Init 00000000
 
@@ -782,12 +827,12 @@ Symbol: SysTick_Wait1ms
    Definitions
       At line 38 in file main.s
    Uses
-      At line 194 in file main.s
-      At line 202 in file main.s
-      At line 215 in file main.s
-      At line 223 in file main.s
-      At line 236 in file main.s
-      At line 244 in file main.s
+      At line 217 in file main.s
+      At line 225 in file main.s
+      At line 238 in file main.s
+      At line 246 in file main.s
+      At line 259 in file main.s
+      At line 267 in file main.s
 
 9 symbols
-372 symbols in table
+374 symbols in table

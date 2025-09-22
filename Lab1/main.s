@@ -84,6 +84,7 @@ Acende3Display  ; Acende segmentos: a, b, c, d, g
 
 Acende4Display  ; Acende segmentos: b, c, f, g
     MOV R9, #2_1100000  ; PA (gfe = 110)
+	BL PortA_Output
     MOV R9, #2_0110     ; PQ (dcba = 0110)
     BL PortQ_Output
     B FimAcende
@@ -138,9 +139,25 @@ MainLoop
     MOV R6, #0
     CMP R10, R11
     BLT aumenta
+    BGT diminui
+    ; igual
+    MOV R9, #2_11
+    PUSH {LR}
+    BL PortN_Output
+    POP {LR}
+    B PulaTempo
+diminui
+    MOV R9, #2_10
+    PUSH {LR}
+    BL PortN_Output
+    POP {LR}
     SUB R10, R10, #1
     B PulaTempo
 aumenta
+    MOV R9, #2_1
+    PUSH {LR}
+    BL PortN_Output
+    POP {LR}
     ADD R10, R10, #1
 PulaTempo
     
@@ -149,7 +166,7 @@ AcendeDisplay
 
     CMP R8, #1
     BEQ unidade
-    ;BGT acendeLEDs
+    BGT acendeLEDs
     MOV R7, R0
     B dezena
 unidade
@@ -176,7 +193,13 @@ dezena
     BEQ Acende8Display
     CMP R7, #9
     BEQ Acende9Display
-    B FimAcendeDezena
+
+acendeLEDs
+    BIC R9, R11, #2_00001111
+    BL PortA_Output
+    AND R9, R11, #2_00001111
+    BL PortQ_Output
+    B FimAcende
 
 FimAcende 
     ; Verifica se a unidade ou a dezena deve ser acesa
