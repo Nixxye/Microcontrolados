@@ -51,90 +51,7 @@ Start
 	BL GPIO_Init                 ;Chama a subrotina que inicializa os GPIO
 	MOV R10, #15 ; Temperatura atual				
 	MOV R11, #25 ; Temperatura alvo
-	LDR R6, =GPIO_PORTB_DATA_R
-	LDR R7, [R6]
-MainLoop
-	B ValorDisplay
-	B MainLoop
-	
-ValorDisplay
-	; Recebe um número no R10 e mostra nos displays de 7 segmentos
-	MOV R1, #10
-	UDIV R0, R10, R1 ; R0 = R10 / 10
-
-	MLS R1, R0, R1, R10 ; R1 = R10 - R0 * 10
-	; R0 = dezena, R1 = unidade
-
-    MOV R8, #0
-
-AcendeDisplay
-	
-	PUSH {R0,R1}
-	BL SysTick_Wait1ms
-	POP {R0,R1}
-
-	CMP R0, #0
-	BEQ Acende0Display
-    CMP R0, #1
-    BEQ Acende1Display
-    CMP R0, #2
-    BEQ Acende2Display
-    CMP R0, #3
-    BEQ Acende3Display
-    CMP R0, #4
-    BEQ Acende4Display
-    CMP R0, #5
-    BEQ Acende5Display
-    CMP R0, #6
-    BEQ Acende6Display
-    CMP R0, #7
-    BEQ Acende7Display
-    CMP R0, #8
-    BEQ Acende8Display
-    CMP R0, #9
-    BEQ Acende9Display
-    B FimAcendeDezena
-
-FimAcende 
-    ; Verifica se a unidade ou a dezena deve ser acesa
-
-FimAcendeDezena
-	; Liga transistor da dezena (Q2)
-    BL HabilitarDisplayDezena
-
-	BL SysTick_Wait1ms
-    
-    ; Desliga transistor da dezena (Q2)
-    BL DesabilitarDisplayDezena
-    
-	BL SysTick_Wait1ms
-
-	B MainLoop
-
-FimAcendeUnidade
-	; Liga transistor da unidade (Q1)
-	BL HabilitarDisplayUnidade
-
-	BL SysTick_Wait1ms
-
-    ; Desliga transistor da unidade (Q1)
-    BL DesabilitarDisplayUnidade
-    
-	BL SysTick_Wait1ms
-
-	B MainLoop
-
-FimAcendeLEDs
-	; Liga transistor da unidade (Q0)
-	BL HabilitarLEDs
-
-	BL SysTick_Wait1ms
-
-    ; Desliga transistor da unidade (Q0)
-    BL DesabilitarLEDs
-    
-	BL SysTick_Wait1ms
-
+    MOV R6, #0 ; contador de tempo
 	B MainLoop
 
 Acende0Display  ; Acende segmentos: a, b, c, d, e, f
@@ -145,102 +62,238 @@ Acende0Display  ; Acende segmentos: a, b, c, d, e, f
     B FimAcende
 
 Acende1Display  ; Acende segmentos: b, c
-    MOV R6, #2_0000000  ; PA (gfe = 000)
-    MOV R7, #2_0110     ; PQ (dcba = 0110)
-    ORR R4, R4, R6
-    ORR R5, R5, R7
+    MOV R9, #2_0000000  ; PA (gfe = 000)
+    BL PortA_Output
+    MOV R9, #2_0110     ; PQ (dcba = 0110)
+    BL PortQ_Output
     B FimAcende
 
 Acende2Display  ; Acende segmentos: a, b, d, e, g
-    MOV R6, #2_1010000  ; PA (gfe = 101)
-    MOV R7, #2_1011     ; PQ (dcba = 1011)
-    ORR R4, R4, R6
-    ORR R5, R5, R7
+    MOV R9, #2_1010000  ; PA (gfe = 101)
+    BL PortA_Output
+    MOV R9, #2_1011     ; PQ (dcba = 1011)
+    BL PortQ_Output
     B FimAcende
 
 Acende3Display  ; Acende segmentos: a, b, c, d, g
-    MOV R6, #2_1000000  ; PA (gfe = 100)
-    MOV R7, #2_1111     ; PQ (dcba = 1111)
-    ORR R4, R4, R6
-    ORR R5, R5, R7
+    MOV R9, #2_1000000  ; PA (gfe = 100)
+    BL PortA_Output
+    MOV R9, #2_1111     ; PQ (dcba = 1111)
+    BL PortQ_Output
     B FimAcende
 
 Acende4Display  ; Acende segmentos: b, c, f, g
-    MOV R6, #2_1100000  ; PA (gfe = 110)
-    MOV R7, #2_0110     ; PQ (dcba = 0110)
-    ORR R4, R4, R6
-    ORR R5, R5, R7
+    MOV R9, #2_1100000  ; PA (gfe = 110)
+    MOV R9, #2_0110     ; PQ (dcba = 0110)
+    BL PortQ_Output
     B FimAcende
 
 Acende5Display  ; Acende segmentos: a, c, d, f, g
-    MOV R6, #2_1100000  ; PA (gfe = 110)
-    MOV R7, #2_1101     ; PQ (dcba = 1101)
-    ORR R4, R4, R6
-    ORR R5, R5, R7
+    MOV R9, #2_1100000  ; PA (gfe = 110)
+    BL PortA_Output
+    MOV R9, #2_1101     ; PQ (dcba = 1101)
+    BL PortQ_Output
     B FimAcende
 
 Acende6Display  ; Acende segmentos: a, c, d, e, f, g
-    MOV R6, #2_1110000  ; PA (gfe = 111)
-    MOV R7, #2_1101     ; PQ (dcba = 1101)
-    ORR R4, R4, R6
-    ORR R5, R5, R7
+    MOV R9, #2_1110000  ; PA (gfe = 111)
+    BL PortA_Output
+    MOV R9, #2_1101     ; PQ (dcba = 1101)
+    BL PortQ_Output
     B FimAcende
 
 Acende7Display  ; Acende segmentos: a, b, c
-    MOV R6, #2_0000000  ; PA (gfe = 000)
-    MOV R7, #2_0111     ; PQ (dcba = 0111)
-    ORR R4, R4, R6
-    ORR R5, R5, R7
+    MOV R9, #2_0000000  ; PA (gfe = 000)
+    BL PortA_Output
+    MOV R9, #2_0111     ; PQ (dcba = 0111)
+    BL PortQ_Output
     B FimAcende
 
 Acende8Display  ; Acende segmentos: a, b, c, d, e, f, g
-    MOV R6, #2_1110000  ; PA (gfe = 111)
-    MOV R7, #2_1111     ; PQ (dcba = 1111)
-    ORR R4, R4, R6
-    ORR R5, R5, R7
+    MOV R9, #2_1110000  ; PA (gfe = 111)
+    BL PortA_Output
+    MOV R9, #2_1111     ; PQ (dcba = 1111)
+    BL PortQ_Output
     B FimAcende
 
 Acende9Display  ; Acende segmentos: a, b, c, d, f, g
-    MOV R6, #2_1100000  ; PA (gfe = 110)
-    MOV R7, #2_1111     ; PQ (dcba = 1111)
-    ORR R4, R4, R6
-    ORR R5, R5, R7
+    MOV R9, #2_1100000  ; PA (gfe = 110)
+    BL PortA_Output
+    MOV R9, #2_1111     ; PQ (dcba = 1111)
+    BL PortQ_Output
     B FimAcende
+
+MainLoop
+	; Recebe um número no R10 e mostra nos displays de 7 segmentos
+	MOV R1, #10
+	UDIV R0, R10, R1 ; R0 = R10 / 10
+
+	MLS R1, R0, R1, R10 ; R1 = R10 - R0 * 10
+	; R0 = dezena, R1 = unidade
+
+    ADD R6, R6, #1
+    CMP R6, #400
+    BLT  PulaTempo
+    ; A cada 1 segundo ajusta a temperatura
+    MOV R6, #0
+    CMP R10, R11
+    BLT aumenta
+    SUB R10, R10, #1
+    B PulaTempo
+aumenta
+    ADD R10, R10, #1
+PulaTempo
+    
+
+AcendeDisplay
+
+    CMP R8, #1
+    BEQ unidade
+    ;BGT acendeLEDs
+    MOV R7, R0
+    B dezena
+unidade
+    MOV R7, R1
+dezena
+
+	CMP R7, #0
+	BEQ Acende0Display
+    CMP R7, #1
+    BEQ Acende1Display
+    CMP R7, #2
+    BEQ Acende2Display
+    CMP R7, #3
+    BEQ Acende3Display
+    CMP R7, #4
+    BEQ Acende4Display
+    CMP R7, #5
+    BEQ Acende5Display
+    CMP R7, #6
+    BEQ Acende6Display
+    CMP R7, #7
+    BEQ Acende7Display
+    CMP R7, #8
+    BEQ Acende8Display
+    CMP R7, #9
+    BEQ Acende9Display
+    B FimAcendeDezena
+
+FimAcende 
+    ; Verifica se a unidade ou a dezena deve ser acesa
+    CMP R8, #1
+    BEQ FimAcendeUnidade
+    BLT FimAcendeDezena
+    B FimAcendeLEDs
+
+FimAcendeDezena
+	; Liga transistor da dezena (Q2)
+    BL HabilitarDisplayDezena
+
+	PUSH {R0}
+    MOV R0, #1
+    BL SysTick_Wait1ms
+    POP {R0}
+    
+    ; Desliga transistor da dezena (Q2)
+    BL DesabilitarDisplayDezena
+    
+	PUSH {R0}
+    MOV R0, #1
+    BL SysTick_Wait1ms
+    POP {R0}
+
+    ADD R8, #1
+
+	B MainLoop
+
+FimAcendeUnidade
+	; Liga transistor da unidade (Q1)
+	BL HabilitarDisplayUnidade
+
+	PUSH {R0}
+    MOV R0, #1
+    BL SysTick_Wait1ms
+    POP {R0}
+
+    ; Desliga transistor da unidade (Q1)
+    BL DesabilitarDisplayUnidade
+    
+	PUSH {R0}
+    MOV R0, #1
+    BL SysTick_Wait1ms
+    POP {R0}
+
+    ADD R8, #1
+
+	B MainLoop
+
+FimAcendeLEDs
+	; Liga transistor da unidade (Q0)
+	BL HabilitarLEDs
+
+	PUSH {R0}
+    MOV R0, #1
+    BL SysTick_Wait1ms
+    POP {R0}
+
+    ; Desliga transistor da unidade (Q0)
+    BL DesabilitarLEDs
+    
+	PUSH {R0}
+    MOV R0, #1
+    BL SysTick_Wait1ms
+    POP {R0}
+    
+    MOV R8, #0
+
+	B MainLoop
 
 HabilitarDisplayUnidade
     ; Atualiza transistor
     MOV R9, #2_00100000 ; PB
+    PUSH { LR }
     BL PortB_Output
+    POP { LR }
     BX LR
 
 HabilitarDisplayDezena
     ; Atualiza transistor
     MOV R9, #2_00010000 ; PB
+    PUSH { LR }
     BL PortB_Output
+    POP { LR }
     BX LR
 
 DesabilitarDisplayUnidade
     ; Atualiza transistor
-    MOV R9, #2_11011111 ; PB
+    MOV R9, #2_11001111 ; PB
+    PUSH { LR }
     BL PortB_Output
+    POP { LR }
     BX LR
 
 DesabilitarDisplayDezena
     ; Atualiza transistor
-    MOV R9, #2_11101111 ; PB
+    MOV R9, #2_11001111 ; PB
+    PUSH { LR }
     BL PortB_Output
+    POP { LR }
     BX LR
 
 HabilitarLEDs
     ; Atualiza transistor
     MOV R9, #2_00100000 ; PB
+    PUSH { LR }
     BL PortP_Output
+    POP { LR }
     BX LR
 
 DesabilitarLEDs
     ; Atualiza transistor
     MOV R9, #2_11011111 ; PB
+    PUSH { LR }
     BL PortP_Output
+    POP { LR }
     BX LR
 
     ALIGN                        ;Garante que o fim da se��o est� alinhada 

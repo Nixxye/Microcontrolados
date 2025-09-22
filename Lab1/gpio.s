@@ -272,7 +272,6 @@ ADC0_DCCMP7_R          EQU 0x40038E5C
 		; Se chamar alguma fun��o externa	
         IMPORT EnableInterrupts
         IMPORT DisableInterrupts
-		IMPORT SysTick_Wait1ms
 
 ;--------------------------------------------------------------------------------
 ; Fun��o GPIO_Init
@@ -556,14 +555,12 @@ GPIOPortJ_Handler
 	LDR R0, =GPIO_PORTJ_AHB_ICR_R
 	MOV R1, #2_01
 	STR R1, [R0]
-	PUSH {LR}
 	; Lógica ao pressionar a chave1
 	ADD R11, R11, #1
 	CMP R11, #50 ; Compara se ficou maior que 50
 	BLT PULO_MAIOR
 	MOV R11, #50 ; Limita a 50 graus
 PULO_MAIOR
-	POP {LR}
     B FIM_INTERRUPT
 
 
@@ -571,20 +568,17 @@ CHAVE2
 	LDR R0, =GPIO_PORTJ_AHB_ICR_R    
 	MOV R1, #2_10
 	STR R1, [R0]
-	PUSH {LR}
 	; Diminui temperatura
 	SUB R11, R11, #1
 	CMP R11, #5 ; Compara se ficou menor que 5
 	BGT PULO_MENOR
 	MOV R11, #5 ; Limita a 5 graus
 PULO_MENOR
-	
 
-	POP {LR}
-	POP {R0, R1}
 CHAVE1
 	
 FIM_INTERRUPT
+	POP {R0, R1}
 	BX LR
 	
     ALIGN                           ; garante que o fim da se��o est� alinhada 
