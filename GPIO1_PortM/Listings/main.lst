@@ -1,0 +1,597 @@
+
+
+
+ARM Macro Assembler    Page 1 
+
+
+    1 00000000         ; main.s
+    2 00000000         ; Desenvolvido para a placa EK-TM4C1294XL
+    3 00000000         ; Prof. Guilherme Peron
+    4 00000000         ; 15/03/2018
+    5 00000000         ; Este programa espera o usu�rio apertar a chave USR_S
+                       W1 e/ou a chave USR_SW2.
+    6 00000000         ; Caso o usu�rio pressione a chave USR_SW1, acender�
+                        o LED2. Caso o usu�rio pressione 
+    7 00000000         ; a chave USR_SW2, acender� o LED1. Caso as duas chave
+                       s sejam pressionadas, os dois 
+    8 00000000         ; LEDs acendem.
+    9 00000000         
+   10 00000000         ; ------------------------------------------------------
+                       -------------------------
+   11 00000000                 THUMB                        ; Instru��es do
+                                                             tipo Thumb-2
+   12 00000000         ; ------------------------------------------------------
+                       -------------------------
+   13 00000000         
+   14 00000000         ; ------------------------------------------------------
+                       -------------------------
+   15 00000000         ; �rea de Dados - Declara��es de vari�veis
+   16 00000000                 AREA             DATA, ALIGN=2
+   17 00000000         ; Se alguma vari�vel for chamada em outro arquivo
+   18 00000000         ;EXPORT  <var> [DATA,SIZE=<tam>]   ; Permite chamar a va
+                       ri�vel <var> a 
+   19 00000000         ; partir de outro arquivo
+   20 00000000         ;<var> SPACE <tam>                        ; Declara uma 
+                       vari�vel de nome <var>
+   21 00000000         ; de <tam> bytes a partir da primeira 
+   22 00000000         ; posi��o da RAM  
+   23 00000000         
+   24 00000000         ; ------------------------------------------------------
+                       -------------------------
+   25 00000000         ; �rea de C�digo - Tudo abaixo da diretiva a seguir 
+                       ser� armazenado na mem�ria de 
+   26 00000000         ;                  c�digo
+   27 00000000                 AREA             |.text|, CODE, READONLY, ALIGN=
+2
+   28 00000000         
+   29 00000000         ; Se alguma fun��o do arquivo for chamada em outro a
+                       rquivo 
+   30 00000000                 EXPORT           Start       ; Permite chamar a 
+                                                            fun��o Start a 
+                                                            partir de 
+   31 00000000         ; outro arquivo. No caso startup.s
+   32 00000000         
+   33 00000000         ; Se chamar alguma fun��o externa 
+   34 00000000         ;IMPORT <func>              ; Permite chamar dentro dest
+                       e arquivo uma 
+   35 00000000         ; fun��o <func>
+   36 00000000                 IMPORT           PLL_Init
+   37 00000000                 IMPORT           SysTick_Init
+   38 00000000                 IMPORT           SysTick_Wait1ms
+   39 00000000                 IMPORT           GPIO_Init
+   40 00000000                 IMPORT           PortN_Output
+   41 00000000                 IMPORT           PortA_Output
+   42 00000000                 IMPORT           PortQ_Output
+   43 00000000                 IMPORT           PortB_Output
+
+
+
+ARM Macro Assembler    Page 2 
+
+
+   44 00000000                 IMPORT           PortP_Output
+   45 00000000                 IMPORT           GPIO_PORTA_DATA_R
+   46 00000000                 IMPORT           GPIO_PORTB_DATA_R
+   47 00000000                 IMPORT           GPIO_PORTQ_DATA_R
+   48 00000000         
+   49 00000000         ; ------------------------------------------------------
+                       -------------------------
+   50 00000000         ; Fun��o main()
+   51 00000000         Start
+   52 00000000 F7FF FFFE       BL               PLL_Init    ;Chama a subrotina 
+                                                            para alterar o cloc
+                                                            k do microcontrolad
+                                                            or para 80MHz
+   53 00000004 F7FF FFFE       BL               SysTick_Init ;Chama a subrotina
+                                                             para inicializar o
+                                                             SysTick
+   54 00000008 F7FF FFFE       BL               GPIO_Init   ;Chama a subrotina 
+                                                            que inicializa os G
+                                                            PIO
+   55 0000000C F04F 0A0F       MOV              R10, #15    ; Temperatura atual
+                                                                
+   56 00000010 F04F 0B19       MOV              R11, #25    ; Temperatura alvo
+   57 00000014 4E4E            LDR              R6, =GPIO_PORTB_DATA_R
+   58 00000016 6837            LDR              R7, [R6]
+   59 00000018         ; Setando bit para 1
+   60 00000018 F04F 0810       LDR              R8, =2_10000
+   61 0000001C F8C6 8000       STR              R8, [R6]
+   62 00000020         MainLoop
+   63 00000020 F000 F801       BL               ValorDisplay
+   64 00000024 E7FC            B                MainLoop
+   65 00000026         
+   66 00000026         ValorDisplay
+   67 00000026         ; Recebe um número no R10 e mostra nos displays de 7 se
+                       gmentos
+   68 00000026 F04F 010A       MOV              R1, #10
+   69 0000002A FBBA F0F1       UDIV             R0, R10, R1 ; R0 = R10 / 10
+   70 0000002E         
+   71 0000002E FB00 A111       MLS              R1, R0, R1, R10 ; R1 = R10 - R0
+                                                             * 10
+   72 00000032         ; R0 = dezena, R1 = unidade
+   73 00000032 F000 F800       BL               LigaDisplayDezena
+   74 00000036         
+   75 00000036         LigaDisplayDezena
+   76 00000036         ; Liga o display da dezena
+   77 00000036 B403            PUSH             {R0,R1}
+   78 00000038 F7FF FFFE       BL               SysTick_Wait1ms
+   79 0000003C BC03            POP              {R0,R1}
+   80 0000003E         
+   81 0000003E F04F 030F       MOV              R3, #2_1111
+   82 00000042 4C44            LDR              R4, =GPIO_PORTA_DATA_R
+   83 00000044 6824            LDR              R4, [R4]
+   84 00000046 EA04 0403       AND              R4, R4, R3  ; Apaga todos os bi
+                                                            ts do display e man
+                                                            tém os 4 primeiros
+                                                            
+   85 0000004A         
+   86 0000004A 4D43            LDR              R5, =GPIO_PORTQ_DATA_R
+   87 0000004C 682D            LDR              R5, [R5]
+   88 0000004E EA25 0503       BIC              R5, R5, R3  ; Mantém todos os 
+
+
+
+ARM Macro Assembler    Page 3 
+
+
+                                                            bits do display e a
+                                                            paga os 4 primeiros
+                                                            
+   89 00000052         
+   90 00000052 2800            CMP              R0, #0
+   91 00000054 D021            BEQ              Acende0
+   92 00000056 2801            CMP              R0, #1
+   93 00000058 D028            BEQ              Acende1
+   94 0000005A 2802            CMP              R0, #2
+   95 0000005C D02F            BEQ              Acende2
+   96 0000005E 2803            CMP              R0, #3
+   97 00000060 D036            BEQ              Acende3
+   98 00000062 2804            CMP              R0, #4
+   99 00000064 D03D            BEQ              Acende4
+  100 00000066 2805            CMP              R0, #5
+  101 00000068 D044            BEQ              Acende5
+  102 0000006A 2806            CMP              R0, #6
+  103 0000006C D04B            BEQ              Acende6
+  104 0000006E 2807            CMP              R0, #7
+  105 00000070 D052            BEQ              Acende7
+  106 00000072 2808            CMP              R0, #8
+  107 00000074 D059            BEQ              Acende8
+  108 00000076 2809            CMP              R0, #9
+  109 00000078 D060            BEQ              Acende9
+  110 0000007A E7FF            B                FimAcendeDezena
+  111 0000007C         
+  112 0000007C         FimAcendeDezena
+  113 0000007C 4E35            LDR              R6, =GPIO_PORTA_DATA_R
+  114 0000007E 4F36            LDR              R7, =GPIO_PORTQ_DATA_R
+  115 00000080 6034            STR              R4, [R6]
+  116 00000082 603D            STR              R5, [R7]
+  117 00000084         
+  118 00000084         ; Atualiza transistor
+  119 00000084 4E32            LDR              R6, =GPIO_PORTB_DATA_R
+  120 00000086 6837            LDR              R7, [R6]
+  121 00000088         ; Setando bit para 1
+  122 00000088         ;LDR R8, =2_10000
+  123 00000088 EA47 0708       ORR              R7, R7, R8
+  124 0000008C         ;STR R7, [R6]
+  125 0000008C         
+  126 0000008C F7FF FFFE       BL               SysTick_Wait1ms
+  127 00000090         ; Setando bit para 0
+  128 00000090 EA27 0708       BIC              R7, R7, R8
+  129 00000094         ;STR R7, [R6]
+  130 00000094         
+  131 00000094 F7FF FFFE       BL               SysTick_Wait1ms
+  132 00000098         
+  133 00000098 E7C2            B                MainLoop
+  134 0000009A         
+  135 0000009A         Acende0
+  136 0000009A F04F 0630       MOV              R6, #2_110000 ; PA
+  137 0000009E F04F 070F       MOV              R7, #2_1111 ; PQ
+  138 000000A2 EA44 0406       ORR              R4, R4, R6
+  139 000000A6 EA45 0507       ORR              R5, R5, R7
+  140 000000AA E7E7            B                FimAcendeDezena
+  141 000000AC         
+  142 000000AC         Acende1                              ; Acende segmentos:
+                                                             b, c
+  143 000000AC F04F 0600       MOV              R6, #2_0000000 ; PA (gfe = 000)
+
+
+
+ARM Macro Assembler    Page 4 
+
+
+                                                            
+  144 000000B0 F04F 0706       MOV              R7, #2_0110 ; PQ (dcba = 0110)
+  145 000000B4 EA44 0406       ORR              R4, R4, R6
+  146 000000B8 EA45 0507       ORR              R5, R5, R7
+  147 000000BC E7DE            B                FimAcendeDezena
+  148 000000BE         
+  149 000000BE         Acende2                              ; Acende segmentos:
+                                                             a, b, d, e, g
+  150 000000BE F04F 0650       MOV              R6, #2_1010000 ; PA (gfe = 101)
+                                                            
+  151 000000C2 F04F 070B       MOV              R7, #2_1011 ; PQ (dcba = 1011)
+  152 000000C6 EA44 0406       ORR              R4, R4, R6
+  153 000000CA EA45 0507       ORR              R5, R5, R7
+  154 000000CE E7D5            B                FimAcendeDezena
+  155 000000D0         
+  156 000000D0         Acende3                              ; Acende segmentos:
+                                                             a, b, c, d, g
+  157 000000D0 F04F 0640       MOV              R6, #2_1000000 ; PA (gfe = 100)
+                                                            
+  158 000000D4 F04F 070F       MOV              R7, #2_1111 ; PQ (dcba = 1111)
+  159 000000D8 EA44 0406       ORR              R4, R4, R6
+  160 000000DC EA45 0507       ORR              R5, R5, R7
+  161 000000E0 E7CC            B                FimAcendeDezena
+  162 000000E2         
+  163 000000E2         Acende4                              ; Acende segmentos:
+                                                             b, c, f, g
+  164 000000E2 F04F 0660       MOV              R6, #2_1100000 ; PA (gfe = 110)
+                                                            
+  165 000000E6 F04F 0706       MOV              R7, #2_0110 ; PQ (dcba = 0110)
+  166 000000EA EA44 0406       ORR              R4, R4, R6
+  167 000000EE EA45 0507       ORR              R5, R5, R7
+  168 000000F2 E7C3            B                FimAcendeDezena
+  169 000000F4         
+  170 000000F4         Acende5                              ; Acende segmentos:
+                                                             a, c, d, f, g
+  171 000000F4 F04F 0660       MOV              R6, #2_1100000 ; PA (gfe = 110)
+                                                            
+  172 000000F8 F04F 070D       MOV              R7, #2_1101 ; PQ (dcba = 1101)
+  173 000000FC EA44 0406       ORR              R4, R4, R6
+  174 00000100 EA45 0507       ORR              R5, R5, R7
+  175 00000104 E7BA            B                FimAcendeDezena
+  176 00000106         
+  177 00000106         Acende6                              ; Acende segmentos:
+                                                             a, c, d, e, f, g
+  178 00000106 F04F 0670       MOV              R6, #2_1110000 ; PA (gfe = 111)
+                                                            
+  179 0000010A F04F 070D       MOV              R7, #2_1101 ; PQ (dcba = 1101)
+  180 0000010E EA44 0406       ORR              R4, R4, R6
+  181 00000112 EA45 0507       ORR              R5, R5, R7
+  182 00000116 E7B1            B                FimAcendeDezena
+  183 00000118         
+  184 00000118         Acende7                              ; Acende segmentos:
+                                                             a, b, c
+  185 00000118 F04F 0600       MOV              R6, #2_0000000 ; PA (gfe = 000)
+                                                            
+  186 0000011C F04F 0707       MOV              R7, #2_0111 ; PQ (dcba = 0111)
+  187 00000120 EA44 0406       ORR              R4, R4, R6
+  188 00000124 EA45 0507       ORR              R5, R5, R7
+  189 00000128 E7A8            B                FimAcendeDezena
+
+
+
+ARM Macro Assembler    Page 5 
+
+
+  190 0000012A         
+  191 0000012A         Acende8                              ; Acende segmentos:
+                                                             a, b, c, d, e, f, 
+                                                            g
+  192 0000012A F04F 0670       MOV              R6, #2_1110000 ; PA (gfe = 111)
+                                                            
+  193 0000012E F04F 070F       MOV              R7, #2_1111 ; PQ (dcba = 1111)
+  194 00000132 EA44 0406       ORR              R4, R4, R6
+  195 00000136 EA45 0507       ORR              R5, R5, R7
+  196 0000013A E79F            B                FimAcendeDezena
+  197 0000013C         
+  198 0000013C         Acende9                              ; Acende segmentos:
+                                                             a, b, c, d, f, g
+  199 0000013C F04F 0660       MOV              R6, #2_1100000 ; PA (gfe = 110)
+                                                            
+  200 00000140 F04F 070F       MOV              R7, #2_1111 ; PQ (dcba = 1111)
+  201 00000144 EA44 0406       ORR              R4, R4, R6
+  202 00000148 EA45 0507       ORR              R5, R5, R7
+  203 0000014C E796            B                FimAcendeDezena
+  204 0000014E         
+  205 0000014E         LigaDisplayUnidade
+  206 0000014E         ; Liga o display da unidade
+  207 0000014E         
+  208 0000014E 00 00           ALIGN                        ;Garante que o fim 
+                                                            da se��o est�
+                                                             alinhada 
+  209 00000150                 END                          ;Fim do arquivo
+              00000000 
+              00000000 
+              00000000 
+Command Line: --debug --xref --diag_suppress=9931 --cpu=Cortex-M4.fp.sp --apcs=
+interwork --depend=.\objects\main.d -o.\objects\main.o -IC:\Users\Nix\AppData\L
+ocal\Arm\Packs\Keil\TM4C_DFP\1.1.0\Device\Include\TM4C129 --predefine="__EVAL S
+ETA 1" --predefine="__UVISION_VERSION SETA 536" --predefine="TM4C1294NCPDT SETA
+ 1" --list=.\listings\main.lst main.s
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+DATA 00000000
+
+Symbol: DATA
+   Definitions
+      At line 16 in file main.s
+   Uses
+      None
+Comment: DATA unused
+1 symbol
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+Relocatable symbols
+
+.text 00000000
+
+Symbol: .text
+   Definitions
+      At line 27 in file main.s
+   Uses
+      None
+Comment: .text unused
+Acende0 0000009A
+
+Symbol: Acende0
+   Definitions
+      At line 135 in file main.s
+   Uses
+      At line 91 in file main.s
+Comment: Acende0 used once
+Acende1 000000AC
+
+Symbol: Acende1
+   Definitions
+      At line 142 in file main.s
+   Uses
+      At line 93 in file main.s
+Comment: Acende1 used once
+Acende2 000000BE
+
+Symbol: Acende2
+   Definitions
+      At line 149 in file main.s
+   Uses
+      At line 95 in file main.s
+Comment: Acende2 used once
+Acende3 000000D0
+
+Symbol: Acende3
+   Definitions
+      At line 156 in file main.s
+   Uses
+      At line 97 in file main.s
+Comment: Acende3 used once
+Acende4 000000E2
+
+Symbol: Acende4
+   Definitions
+      At line 163 in file main.s
+   Uses
+      At line 99 in file main.s
+Comment: Acende4 used once
+Acende5 000000F4
+
+Symbol: Acende5
+   Definitions
+      At line 170 in file main.s
+   Uses
+      At line 101 in file main.s
+Comment: Acende5 used once
+Acende6 00000106
+
+Symbol: Acende6
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+Relocatable symbols
+
+   Definitions
+      At line 177 in file main.s
+   Uses
+      At line 103 in file main.s
+Comment: Acende6 used once
+Acende7 00000118
+
+Symbol: Acende7
+   Definitions
+      At line 184 in file main.s
+   Uses
+      At line 105 in file main.s
+Comment: Acende7 used once
+Acende8 0000012A
+
+Symbol: Acende8
+   Definitions
+      At line 191 in file main.s
+   Uses
+      At line 107 in file main.s
+Comment: Acende8 used once
+Acende9 0000013C
+
+Symbol: Acende9
+   Definitions
+      At line 198 in file main.s
+   Uses
+      At line 109 in file main.s
+Comment: Acende9 used once
+FimAcendeDezena 0000007C
+
+Symbol: FimAcendeDezena
+   Definitions
+      At line 112 in file main.s
+   Uses
+      At line 110 in file main.s
+      At line 140 in file main.s
+      At line 147 in file main.s
+      At line 154 in file main.s
+      At line 161 in file main.s
+      At line 168 in file main.s
+      At line 175 in file main.s
+      At line 182 in file main.s
+      At line 189 in file main.s
+      At line 196 in file main.s
+      At line 203 in file main.s
+
+LigaDisplayDezena 00000036
+
+Symbol: LigaDisplayDezena
+   Definitions
+      At line 75 in file main.s
+   Uses
+      At line 73 in file main.s
+Comment: LigaDisplayDezena used once
+LigaDisplayUnidade 0000014E
+
+Symbol: LigaDisplayUnidade
+   Definitions
+
+
+
+ARM Macro Assembler    Page 3 Alphabetic symbol ordering
+Relocatable symbols
+
+      At line 205 in file main.s
+   Uses
+      None
+Comment: LigaDisplayUnidade unused
+MainLoop 00000020
+
+Symbol: MainLoop
+   Definitions
+      At line 62 in file main.s
+   Uses
+      At line 64 in file main.s
+      At line 133 in file main.s
+
+Start 00000000
+
+Symbol: Start
+   Definitions
+      At line 51 in file main.s
+   Uses
+      At line 30 in file main.s
+Comment: Start used once
+ValorDisplay 00000026
+
+Symbol: ValorDisplay
+   Definitions
+      At line 66 in file main.s
+   Uses
+      At line 63 in file main.s
+Comment: ValorDisplay used once
+17 symbols
+
+
+
+ARM Macro Assembler    Page 1 Alphabetic symbol ordering
+External symbols
+
+GPIO_Init 00000000
+
+Symbol: GPIO_Init
+   Definitions
+      At line 39 in file main.s
+   Uses
+      At line 54 in file main.s
+Comment: GPIO_Init used once
+GPIO_PORTA_DATA_R 00000000
+
+Symbol: GPIO_PORTA_DATA_R
+   Definitions
+      At line 45 in file main.s
+   Uses
+      At line 82 in file main.s
+      At line 113 in file main.s
+
+GPIO_PORTB_DATA_R 00000000
+
+Symbol: GPIO_PORTB_DATA_R
+   Definitions
+      At line 46 in file main.s
+   Uses
+      At line 57 in file main.s
+      At line 119 in file main.s
+
+GPIO_PORTQ_DATA_R 00000000
+
+Symbol: GPIO_PORTQ_DATA_R
+   Definitions
+      At line 47 in file main.s
+   Uses
+      At line 86 in file main.s
+      At line 114 in file main.s
+
+PLL_Init 00000000
+
+Symbol: PLL_Init
+   Definitions
+      At line 36 in file main.s
+   Uses
+      At line 52 in file main.s
+Comment: PLL_Init used once
+PortA_Output 00000000
+
+Symbol: PortA_Output
+   Definitions
+      At line 41 in file main.s
+   Uses
+      None
+Comment: PortA_Output unused
+PortB_Output 00000000
+
+Symbol: PortB_Output
+   Definitions
+      At line 43 in file main.s
+   Uses
+      None
+Comment: PortB_Output unused
+
+
+
+ARM Macro Assembler    Page 2 Alphabetic symbol ordering
+External symbols
+
+PortN_Output 00000000
+
+Symbol: PortN_Output
+   Definitions
+      At line 40 in file main.s
+   Uses
+      None
+Comment: PortN_Output unused
+PortP_Output 00000000
+
+Symbol: PortP_Output
+   Definitions
+      At line 44 in file main.s
+   Uses
+      None
+Comment: PortP_Output unused
+PortQ_Output 00000000
+
+Symbol: PortQ_Output
+   Definitions
+      At line 42 in file main.s
+   Uses
+      None
+Comment: PortQ_Output unused
+SysTick_Init 00000000
+
+Symbol: SysTick_Init
+   Definitions
+      At line 37 in file main.s
+   Uses
+      At line 53 in file main.s
+Comment: SysTick_Init used once
+SysTick_Wait1ms 00000000
+
+Symbol: SysTick_Wait1ms
+   Definitions
+      At line 38 in file main.s
+   Uses
+      At line 78 in file main.s
+      At line 126 in file main.s
+      At line 131 in file main.s
+
+12 symbols
+366 symbols in table
