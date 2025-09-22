@@ -42,9 +42,6 @@
 		IMPORT PortQ_Output
 		IMPORT PortB_Output
 		IMPORT PortP_Output
-		IMPORT GPIO_PORTA_DATA_R
-		IMPORT GPIO_PORTB_DATA_R
-		IMPORT GPIO_PORTQ_DATA_R
 
 ; -------------------------------------------------------------------------------
 ; Fun��o main()
@@ -56,9 +53,6 @@ Start
 	MOV R11, #25 ; Temperatura alvo
 	LDR R6, =GPIO_PORTB_DATA_R
 	LDR R7, [R6]
-	; Setando bit para 1
-	LDR R8, =2_10000
-	STR R8, [R6]
 MainLoop
 	BL ValorDisplay
 	B MainLoop
@@ -70,140 +64,184 @@ ValorDisplay
 
 	MLS R1, R0, R1, R10 ; R1 = R10 - R0 * 10
 	; R0 = dezena, R1 = unidade
-	BL LigaDisplayDezena
 
-LigaDisplayDezena
-	; Liga o display da dezena
+    MOV R8, #0
+
+AcendeDisplay
+	
 	PUSH {R0,R1}
 	BL SysTick_Wait1ms
 	POP {R0,R1}
 
-	MOV R3, #2_1111
-	LDR R4, =GPIO_PORTA_DATA_R
-	LDR R4, [R4]
-	AND R4, R4, R3 ; Apaga todos os bits do display e mantém os 4 primeiros
-
-	LDR R5, =GPIO_PORTQ_DATA_R
-	LDR R5, [R5]
-	BIC R5, R5, R3 ; Mantém todos os bits do display e apaga os 4 primeiros
-
 	CMP R0, #0
-	BEQ Acende0
+	BEQ Acende0Display
     CMP R0, #1
-    BEQ Acende1
+    BEQ Acende1Display
     CMP R0, #2
-    BEQ Acende2
+    BEQ Acende2Display
     CMP R0, #3
-    BEQ Acende3
+    BEQ Acende3Display
     CMP R0, #4
-    BEQ Acende4
+    BEQ Acende4Display
     CMP R0, #5
-    BEQ Acende5
+    BEQ Acende5Display
     CMP R0, #6
-    BEQ Acende6
+    BEQ Acende6Display
     CMP R0, #7
-    BEQ Acende7
+    BEQ Acende7Display
     CMP R0, #8
-    BEQ Acende8
+    BEQ Acende8Display
     CMP R0, #9
-    BEQ Acende9
-    B FimAcendeDezena 
+    BEQ Acende9Display
+    B FimAcendeDezena
+
+FimAcende 
+    ; Verifica se a unidade ou a dezena deve ser acesa
 
 FimAcendeDezena
-	LDR R6, =GPIO_PORTA_DATA_R
-	LDR R7, =GPIO_PORTQ_DATA_R
-	STR R4, [R6]
-	STR R5, [R7]
-	
-	; Atualiza transistor
-	LDR R6, =GPIO_PORTB_DATA_R
-	LDR R7, [R6]
-	; Setando bit para 1
-	;LDR R8, =2_10000
-	ORR R7, R7, R8
-	;STR R7, [R6]
+	; Liga transistor da dezena (Q2)
+    BL HabilitarDisplayDezena
 
 	BL SysTick_Wait1ms
-	; Setando bit para 0
-	BIC R7, R7, R8
-	;STR R7, [R6]
-
+    
+    ; Desliga transistor da dezena (Q2)
+    BL DesabilitarDisplayDezena
+    
 	BL SysTick_Wait1ms
 
 	B MainLoop
 
-Acende0
-	MOV R6, #2_110000 ; PA
-	MOV R7, #2_1111   ; PQ
-	ORR R4, R4, R6
-	ORR R5, R5, R7
-	B FimAcendeDezena
+FimAcendeUnidade
+	; Liga transistor da unidade (Q1)
+	BL HabilitarDisplayUnidade
 
-Acende1     ; Acende segmentos: b, c
+	BL SysTick_Wait1ms
+
+    ; Desliga transistor da unidade (Q1)
+    BL DesabilitarDisplayUnidade
+    
+	BL SysTick_Wait1ms
+
+	B MainLoop
+
+FimAcendeLEDs
+	; Liga transistor da unidade (Q0)
+	BL HabilitarLEDs
+
+	BL SysTick_Wait1ms
+
+    ; Desliga transistor da unidade (Q0)
+    BL DesabilitarLEDs
+    
+	BL SysTick_Wait1ms
+
+	B MainLoop
+
+Acende0Display  ; Acende segmentos: a, b, c, d, e, f
+	MOV R9, #2_110000 ; PA
+    BL PortA_Output
+	MOV R9, #2_1111   ; PQ
+    BL PortQ_Output
+    B FimAcende
+
+Acende1Display  ; Acende segmentos: b, c
     MOV R6, #2_0000000  ; PA (gfe = 000)
     MOV R7, #2_0110     ; PQ (dcba = 0110)
     ORR R4, R4, R6
     ORR R5, R5, R7
-    B FimAcendeDezena
+    B FimAcende
 
-Acende2     ; Acende segmentos: a, b, d, e, g
+Acende2Display  ; Acende segmentos: a, b, d, e, g
     MOV R6, #2_1010000  ; PA (gfe = 101)
     MOV R7, #2_1011     ; PQ (dcba = 1011)
     ORR R4, R4, R6
     ORR R5, R5, R7
-    B FimAcendeDezena
+    B FimAcende
 
-Acende3     ; Acende segmentos: a, b, c, d, g
+Acende3Display  ; Acende segmentos: a, b, c, d, g
     MOV R6, #2_1000000  ; PA (gfe = 100)
     MOV R7, #2_1111     ; PQ (dcba = 1111)
     ORR R4, R4, R6
     ORR R5, R5, R7
-    B FimAcendeDezena
+    B FimAcende
 
-Acende4     ; Acende segmentos: b, c, f, g
+Acende4Display  ; Acende segmentos: b, c, f, g
     MOV R6, #2_1100000  ; PA (gfe = 110)
     MOV R7, #2_0110     ; PQ (dcba = 0110)
     ORR R4, R4, R6
     ORR R5, R5, R7
-    B FimAcendeDezena
+    B FimAcende
 
-Acende5     ; Acende segmentos: a, c, d, f, g
+Acende5Display  ; Acende segmentos: a, c, d, f, g
     MOV R6, #2_1100000  ; PA (gfe = 110)
     MOV R7, #2_1101     ; PQ (dcba = 1101)
     ORR R4, R4, R6
     ORR R5, R5, R7
-    B FimAcendeDezena
+    B FimAcende
 
-Acende6     ; Acende segmentos: a, c, d, e, f, g
+Acende6Display  ; Acende segmentos: a, c, d, e, f, g
     MOV R6, #2_1110000  ; PA (gfe = 111)
     MOV R7, #2_1101     ; PQ (dcba = 1101)
     ORR R4, R4, R6
     ORR R5, R5, R7
-    B FimAcendeDezena
+    B FimAcende
 
-Acende7     ; Acende segmentos: a, b, c
+Acende7Display  ; Acende segmentos: a, b, c
     MOV R6, #2_0000000  ; PA (gfe = 000)
     MOV R7, #2_0111     ; PQ (dcba = 0111)
     ORR R4, R4, R6
     ORR R5, R5, R7
-    B FimAcendeDezena
+    B FimAcende
 
-Acende8     ; Acende segmentos: a, b, c, d, e, f, g
+Acende8Display  ; Acende segmentos: a, b, c, d, e, f, g
     MOV R6, #2_1110000  ; PA (gfe = 111)
     MOV R7, #2_1111     ; PQ (dcba = 1111)
     ORR R4, R4, R6
     ORR R5, R5, R7
-    B FimAcendeDezena
+    B FimAcende
 
-Acende9     ; Acende segmentos: a, b, c, d, f, g
+Acende9Display  ; Acende segmentos: a, b, c, d, f, g
     MOV R6, #2_1100000  ; PA (gfe = 110)
     MOV R7, #2_1111     ; PQ (dcba = 1111)
     ORR R4, R4, R6
     ORR R5, R5, R7
-    B FimAcendeDezena
+    B FimAcende
 
-LigaDisplayUnidade
-	; Liga o display da unidade
+HabilitarDisplayUnidade
+    ; Atualiza transistor
+    MOV R9, #2_00100000 ; PB
+    BL PortB_Output
+    BX LR
+
+HabilitarDisplayDezena
+    ; Atualiza transistor
+    MOV R9, #2_00010000 ; PB
+    BL PortB_Output
+    BX LR
+
+DesabilitarDisplayUnidade
+    ; Atualiza transistor
+    MOV R9, #2_11011111 ; PB
+    BL PortB_Output
+    BX LR
+
+DesabilitarDisplayDezena
+    ; Atualiza transistor
+    MOV R9, #2_11101111 ; PB
+    BL PortB_Output
+    BX LR
+
+HabilitarLEDs
+    ; Atualiza transistor
+    MOV R9, #2_00100000 ; PB
+    BL PortP_Output
+    BX LR
+
+DesabilitarLEDs
+    ; Atualiza transistor
+    MOV R9, #2_11011111 ; PB
+    BL PortP_Output
+    BX LR
 
     ALIGN                        ;Garante que o fim da se��o est� alinhada 
     END                          ;Fim do arquivo

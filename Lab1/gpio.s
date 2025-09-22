@@ -262,18 +262,17 @@ ADC0_DCCMP7_R          EQU 0x40038E5C
 
 		; Se alguma fun��o do arquivo for chamada em outro arquivo	
         EXPORT GPIO_Init            ; Permite chamar GPIO_Init de outro arquivo
-		EXPORT PortN_Output			; Permite chamar PortN_Output de outro arquivo
-		EXPORT GPIO_PORTA_DATA_R
-		EXPORT GPIO_PORTB_DATA_R
-		EXPORT GPIO_PORTQ_DATA_R
 		EXPORT GPIOPortJ_Handler
-        IMPORT EnableInterrupts
-        IMPORT DisableInterrupts
-		IMPORT SysTick_Wait1ms
+		EXPORT PortN_Output
 		EXPORT PortP_Output
 		EXPORT PortB_Output
 		EXPORT PortQ_Output
-		EXPORT PortA_Output			
+		EXPORT PortA_Output
+		
+		; Se chamar alguma fun��o externa	
+        IMPORT EnableInterrupts
+        IMPORT DisableInterrupts
+		IMPORT SysTick_Wait1ms
 
 ;--------------------------------------------------------------------------------
 ; Fun��o GPIO_Init
