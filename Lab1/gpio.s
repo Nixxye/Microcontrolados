@@ -548,6 +548,7 @@ PortP_Output
 ; -------------------------------------------------------------------------------
 ; Fun��o ISR GPIOPortJ_Handler (Tratamento da interrup��o)
 GPIOPortJ_Handler
+	PUSH {R0, R1}
     LDR R0, =GPIO_PORTJ_AHB_RIS_R        
 	LDR R1, [R0]
 	CMP R1, #2_01
@@ -580,7 +581,7 @@ PULO_MENOR
 	
 
 	POP {LR}
-
+	POP {R0, R1}
 CHAVE1
 	
 FIM_INTERRUPT

@@ -54,7 +54,7 @@ Start
 	LDR R6, =GPIO_PORTB_DATA_R
 	LDR R7, [R6]
 MainLoop
-	BL ValorDisplay
+	B ValorDisplay
 	B MainLoop
 	
 ValorDisplay
