@@ -1,6 +1,6 @@
 // gpio.c
 // Desenvolvido para a placa EK-TM4C1294XL
-// Inicializa as portas J e N
+// Inicializa as portas J, N, K e M
 // Prof. Guilherme Peron
 
 
@@ -8,73 +8,181 @@
 
 #include "tm4c1294ncpdt.h"
 
-  
+ 
 #define GPIO_PORTJ  (0x0100) //bit 8
+#define GPIO_PORTK  (0x0200) //bit 9
+#define GPIO_PORTM  (0x0800) //bit 11
 #define GPIO_PORTN  (0x1000) //bit 12
 
-// -------------------------------------------------------------------------------
-// FunÁ„o GPIO_Init
-// Inicializa os ports J e N
-// Par‚metro de entrada: N„o tem
-// Par‚metro de saÌda: N„o tem
-void GPIO_Init(void)
-{
-	//1a. Ativar o clock para a porta setando o bit correspondente no registrador RCGCGPIO
-	SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN);
-	//1b.   apÛs isso verificar no PRGPIO se a porta est· pronta para uso.
-  while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN) ) != (GPIO_PORTJ | GPIO_PORTN) ){};
-	
-	// 2. Limpar o AMSEL para desabilitar a analÛgica
-	GPIO_PORTJ_AHB_AMSEL_R = 0x00;
-	GPIO_PORTN_AMSEL_R = 0x00;
-		
-	// 3. Limpar PCTL para selecionar o GPIO
-	GPIO_PORTJ_AHB_PCTL_R = 0x00;
-	GPIO_PORTN_PCTL_R = 0x00;
+// --- Fun√ß√µes de Atraso (Delay) ---
+void delay_us(volatile uint32_t us) {
+    volatile uint32_t loops_per_us = 4;
+    while(us--) {
+        volatile uint32_t i = loops_per_us;
+        while(i--) {};
+    }
+}
 
-	// 4. DIR para 0 se for entrada, 1 se for saÌda
-	GPIO_PORTJ_AHB_DIR_R = 0x00;
-	GPIO_PORTN_DIR_R = 0x03; //BIT0 | BIT1
-		
-	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem funÁ„o alternativa	
-	GPIO_PORTJ_AHB_AFSEL_R = 0x00;
-	GPIO_PORTN_AFSEL_R = 0x00; 
-		
-	// 6. Setar os bits de DEN para habilitar I/O digital	
-	GPIO_PORTJ_AHB_DEN_R = 0x03;   //Bit0 e bit1
-	GPIO_PORTN_DEN_R = 0x03; 		   //Bit0 e bit1
-	
-	// 7. Habilitar resistor de pull-up interno, setar PUR para 1
-	GPIO_PORTJ_AHB_PUR_R = 0x03;   //Bit0 e bit1	
-
-}	
-
-// -------------------------------------------------------------------------------
-// FunÁ„o PortJ_Input
-// LÍ os valores de entrada do port J
-// Par‚metro de entrada: N„o tem
-// Par‚metro de saÌda: o valor da leitura do port
-uint32_t PortJ_Input(void)
-{
-	return GPIO_PORTJ_AHB_DATA_R;
+void delay_ms(volatile uint32_t ms) {
+    while(ms--) {
+        delay_us(1000);
+    }
 }
 
 // -------------------------------------------------------------------------------
-// FunÁ„o PortN_Output
+// Fun√ß√£o PortJ_Input
+// L√™ os valores de entrada do port J
+// Par√¢metro de entrada: N√£o tem
+// Par√¢metro de sa√≠da: o valor da leitura do port
+uint32_t PortJ_Input(void)
+{
+    return GPIO_PORTJ_AHB_DATA_R;
+}
+
+// -------------------------------------------------------------------------------
+// Fun√ß√£o PortN_Output
 // Escreve os valores no port N
-// Par‚metro de entrada: Valor a ser escrito
-// Par‚metro de saÌda: n„o tem
+// Par√¢metro de entrada: Valor a ser escrito
+// Par√¢metro de sa√≠da: n√£o tem
 void PortN_Output(uint32_t valor)
 {
     uint32_t temp;
     //vamos zerar somente os bits menos significativos
-    //para uma escrita amig·vel nos bits 0 e 1
+    //para uma escrita amig√°vel nos bits 0 e 1
     temp = GPIO_PORTN_DATA_R & 0xFC;
-    //agora vamos fazer o OR com o valor recebido na funÁ„o
+    //agora vamos fazer o OR com o valor recebido na fun√ß√£o
     temp = temp | valor;
     GPIO_PORTN_DATA_R = temp; 
 }
 
+// --- Fun√ß√µes do LCD ---
+
+/**
+ * Envia um comando para o LCD.
+ * - Barramento de dados 8-bit no GPIO_PORTK_DATA_R (PK0-PK7)
+ * - RS = PM0
+ * - R/W = PM1 (sempre 0)
+ * - E  = PM2
+ */
+void lcd_command(uint8_t command) {
+    // Configura RS=0, R/W=0, E=0
+    // (Limpa bits PM0, PM1, PM2)
+    GPIO_PORTM_DATA_R &= ~0x07; 
+
+    // Coloca o comando no barramento de dados (Port K)
+    GPIO_PORTK_DATA_R = command;
+
+    // Gera um pulso em 'E' (PM2)
+    // Seta PM2 (E=1)
+    GPIO_PORTM_DATA_R |= 0x04; 
+    delay_us(1); // Dura√ß√£o do pulso
+
+    // Finaliza o pulso em 'E' (PM2)
+    // Limpa PM2 (E=0)
+    GPIO_PORTM_DATA_R &= ~0x04; 
+}
+
+/**
+ * Envia DADOS (um caractere) para o LCD.
+ * - Barramento de dados 8-bit no GPIO_PORTK_DATA_R (PK0-PK7)
+ * - RS = PM0
+ * - R/W = PM1 (sempre 0)
+ * - E  = PM2
+ */
+void lcd_data(uint8_t data) {
+    
+    // 1. Configura RS=1, R/W=0, E=0
+    //    Seta PM0 (RS=1), Limpa PM1 (R/W=0), Limpa PM2 (E=0)
+    GPIO_PORTM_DATA_R = (GPIO_PORTM_DATA_R & ~0x06) | 0x01;
+
+    // 2. Coloca o caractere ASCII no barramento de dados (Port K)
+    GPIO_PORTK_DATA_R = data;
+
+    // 3. Gera um pulso em 'E' (PM2)
+    //    Seta PM2 (E=1)
+    GPIO_PORTM_DATA_R |= 0x04;
+    delay_us(1); 
+
+    //    Limpa PM2 (E=0)
+    GPIO_PORTM_DATA_R &= ~0x04;
+
+    // 4. Espera o tempo necess√°rio para o LCD processar o caractere
+    delay_us(40);
+}
+
+/**
+ * Escreve uma string (v√°rios caracteres) no LCD
+ */
+void lcd_puts(char *s) {
+    while (*s) {
+        lcd_data(*s);
+        s++;
+    }
+}
+
+void initLCD() {
+    // 1. Inicializar no modo 2 linhas / caracter matriz 5x7 (0x38)
+    lcd_command(0x38);
+    delay_us(40);
+
+    // 2. Cursor com autoincremento para direita (0x06)
+    lcd_command(0x06);
+    delay_us(40);
+
+    // 3. Configurar o cursor (habilitar o display + cursor + n√£o-pisca) (0x0E)
+    lcd_command(0x0E);
+    delay_us(40);
+
+    // 4. Resetar: Limpar o display e levar o cursor para o home (0x01)
+    lcd_command(0x01);
+    delay_ms(2); // Espera 2ms (1.64ms √© o m√≠nimo)
+}
 
 
+// -------------------------------------------------------------------------------
+// Fun√ß√£o GPIO_Init
+// Inicializa os ports J, N (para usu√°rio) e K, M (para o LCD)
+// Par√¢metro de entrada: N√£o tem
+// Par√¢metro de sa√≠da: N√£o tem
+void GPIO_Init(void)
+{
+    // 1a. Ativar o clock para as portas J, N, K e M
+    SYSCTL_RCGCGPIO_R = (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTK | GPIO_PORTM);
+    // 1b. verificar no PRGPIO se as portas est√£o prontas
+  while((SYSCTL_PRGPIO_R & (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTK | GPIO_PORTM) ) != (GPIO_PORTJ | GPIO_PORTN | GPIO_PORTK | GPIO_PORTM) ){};
+    
+    // --- Configura√ß√£o Port J (Conforme original) ---
+    GPIO_PORTJ_AHB_AMSEL_R = 0x00;
+    GPIO_PORTJ_AHB_PCTL_R = 0x00;
+    GPIO_PORTJ_AHB_DIR_R = 0x00;      // Entrada
+    GPIO_PORTJ_AHB_AFSEL_R = 0x00;
+    GPIO_PORTJ_AHB_DEN_R = 0x03;      // Bit0 e bit1
+    GPIO_PORTJ_AHB_PUR_R = 0x03;      // Bit0 e bit1 
+    
+    // --- Configura√ß√£o Port N (Conforme original) ---
+    GPIO_PORTN_AMSEL_R = 0x00;
+    GPIO_PORTN_PCTL_R = 0x00;
+    GPIO_PORTN_DIR_R = 0x03;          // Sa√≠da (BIT0 | BIT1)
+    GPIO_PORTN_AFSEL_R = 0x00; 
+    GPIO_PORTN_DEN_R = 0x03;          // Bit0 e bit1
 
+    // --- (NOVO) Configura√ß√£o Port K (Barramento de Dados LCD D0-D7) ---
+    GPIO_PORTK_AMSEL_R = 0x00;        // 2. Desabilita anal√≥gica
+    GPIO_PORTK_PCTL_R = 0x00;         // 3. Limpa PCTL (GPIO)
+    GPIO_PORTK_DIR_R = 0xFF;          // 4. PK0-PK7 como Sa√≠da (0b11111111)
+    GPIO_PORTK_AFSEL_R = 0x00;        // 5. Desabilita fun√ß√£o alternativa
+    GPIO_PORTK_DEN_R = 0xFF;          // 6. Habilita digital (PK0-PK7)
+    
+    // --- (NOVO) Configura√ß√£o Port M (Controle LCD RS, R/W, EN) ---
+    GPIO_PORTM_AMSEL_R = 0x00;        // 2. Desabilita anal√≥gica
+    GPIO_PORTM_PCTL_R = 0x00;         // 3. Limpa PCTL (GPIO)
+    GPIO_PORTM_DIR_R = 0x07;          // 4. PM0, PM1, PM2 como Sa√≠da (0b00000111)
+    GPIO_PORTM_AFSEL_R = 0x00;        // 5. Desabilita fun√ß√£o alternativa
+    GPIO_PORTM_DEN_R = 0x07;          // 6. Habilita digital (PM0, PM1, PM2)
+    
+    // Seta R/W (PM1) para 0 (modo escrita) permanentemente
+    GPIO_PORTM_DATA_R &= ~0x02; 
+
+    // Inicializa o LCD ap√≥s configurar todas as portas
+    initLCD();
+}

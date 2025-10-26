@@ -14,27 +14,19 @@ void GPIO_Init(void);
 uint32_t PortJ_Input(void);
 void PortN_Output(uint32_t leds);
 void Pisca_leds(void);
+void lcd_data(uint8_t data);
+void lcd_puts(char *s);
 
 int main(void)
 {
 	PLL_Init();
 	SysTick_Init();
 	GPIO_Init();
-	while (1)
-	{
-    //Se a USR_SW2 estiver pressionada
-		if (PortJ_Input() == 0x1)
-			PortN_Output(0x1);
-    //Se a USR_SW1 estiver pressionada
-		else if (PortJ_Input() == 0x2)
-			PortN_Output(0x2);
-    //Se ambas estiverem pressionadas
-		else if (PortJ_Input() == 0x0)
-			Pisca_leds();
-    //Se nenhuma estiver pressionada
-		else if (PortJ_Input() == 0x3)
-			PortN_Output(0x0);        
-	}
+	lcd_data('H');
+	lcd_data('e');
+	lcd_data('l');
+	lcd_data('l');
+	lcd_data('o');
 }
 
 void Pisca_leds(void)
