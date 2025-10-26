@@ -16,17 +16,22 @@ void PortN_Output(uint32_t leds);
 void Pisca_leds(void);
 void lcd_data(uint8_t data);
 void lcd_puts(char *s);
+void resetLCD();
 
 int main(void)
 {
 	PLL_Init();
 	SysTick_Init();
 	GPIO_Init();
-	lcd_data('H');
-	lcd_data('e');
-	lcd_data('l');
-	lcd_data('l');
-	lcd_data('o');
+	while(1) {
+		resetLCD();
+		lcd_data('H');
+		lcd_data('e');
+		lcd_data('l');
+		lcd_data('l');
+		lcd_data('o');
+		SysTick_Wait1ms(1000);
+	}
 }
 
 void Pisca_leds(void)

@@ -14,20 +14,8 @@
 #define GPIO_PORTM  (0x0800) //bit 11
 #define GPIO_PORTN  (0x1000) //bit 12
 
-// --- Funções de Atraso (Delay) ---
-void delay_us(volatile uint32_t us) {
-    volatile uint32_t loops_per_us = 4;
-    while(us--) {
-        volatile uint32_t i = loops_per_us;
-        while(i--) {};
-    }
-}
-
-void delay_ms(volatile uint32_t ms) {
-    while(ms--) {
-        delay_us(1000);
-    }
-}
+void SysTick_Wait1ms(uint32_t delay);
+void SysTick_Wait1ms(uint32_t delay);
 
 // -------------------------------------------------------------------------------
 // Função PortJ_Input
@@ -75,11 +63,16 @@ void lcd_command(uint8_t command) {
     // Gera um pulso em 'E' (PM2)
     // Seta PM2 (E=1)
     GPIO_PORTM_DATA_R |= 0x04; 
-    delay_us(1); // Duração do pulso
+    SysTick_Wait1ms(2); // Duração do pulso
 
     // Finaliza o pulso em 'E' (PM2)
     // Limpa PM2 (E=0)
     GPIO_PORTM_DATA_R &= ~0x04; 
+}
+
+void resetLCD() {
+	lcd_command(0x01);
+	SysTick_Wait1ms(2); // Espera 2ms (1.64ms é o mínimo)
 }
 
 /**
@@ -101,13 +94,13 @@ void lcd_data(uint8_t data) {
     // 3. Gera um pulso em 'E' (PM2)
     //    Seta PM2 (E=1)
     GPIO_PORTM_DATA_R |= 0x04;
-    delay_us(1); 
+    SysTick_Wait1ms(2); 
 
     //    Limpa PM2 (E=0)
     GPIO_PORTM_DATA_R &= ~0x04;
 
     // 4. Espera o tempo necessário para o LCD processar o caractere
-    delay_us(40);
+    SysTick_Wait1ms(40);
 }
 
 /**
@@ -123,19 +116,19 @@ void lcd_puts(char *s) {
 void initLCD() {
     // 1. Inicializar no modo 2 linhas / caracter matriz 5x7 (0x38)
     lcd_command(0x38);
-    delay_us(40);
+    SysTick_Wait1ms(40);
 
     // 2. Cursor com autoincremento para direita (0x06)
     lcd_command(0x06);
-    delay_us(40);
+    SysTick_Wait1ms(40);
 
     // 3. Configurar o cursor (habilitar o display + cursor + não-pisca) (0x0E)
     lcd_command(0x0E);
-    delay_us(40);
+    SysTick_Wait1ms(40);
 
     // 4. Resetar: Limpar o display e levar o cursor para o home (0x01)
     lcd_command(0x01);
-    delay_ms(2); // Espera 2ms (1.64ms é o mínimo)
+    SysTick_Wait1ms(2); // Espera 2ms (1.64ms é o mínimo)
 }
 
 

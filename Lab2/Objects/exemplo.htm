@@ -3,11 +3,11 @@
 <title>Static Call Graph - [.\Objects\exemplo.axf]</title></head>
 <body><HR>
 <H1>Static Call Graph for image .\Objects\exemplo.axf</H1><HR>
-<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sun Oct 26 19:08:06 2025
+<BR><P>#&#060CALLGRAPH&#062# ARM Linker, 5060960: Last Updated: Sun Oct 26 19:35:23 2025
 <BR><P>
-<H3>Maximum Stack Usage =         40 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
+<H3>Maximum Stack Usage =         24 bytes + Unknown(Functions without stacksize, Cycles, Untraceable Function Pointers)</H3><H3>
 Call chain for Maximum Stack Depth:</H3>
-__rt_entry_main &rArr; main &rArr; GPIO_Init &rArr; initLCD &rArr; lcd_command &rArr; delay_us
+__rt_entry_main &rArr; main &rArr; GPIO_Init &rArr; initLCD &rArr; lcd_command
 <P>
 <H3>
 Functions with no stack information
@@ -19,9 +19,10 @@ Functions with no stack information
  <LI><a href="#[b0]">EndCritical</a>
  <LI><a href="#[b1]">WaitForInterrupt</a>
  <LI><a href="#[80]">__user_initial_stackheap</a>
- <LI><a href="#[88]">PLL_Init</a>
- <LI><a href="#[89]">SysTick_Init</a>
- <LI><a href="#[b2]">SysTick_Wait1ms</a>
+ <LI><a href="#[87]">PLL_Init</a>
+ <LI><a href="#[88]">SysTick_Init</a>
+ <LI><a href="#[85]">SysTick_Wait1ms</a>
+ <LI><a href="#[b2]">SysTick_Wait1us</a>
 </UL>
 </UL>
 <P>
@@ -626,8 +627,8 @@ Global Symbols
 <P><STRONG><a name="[aa]"></a>__rt_entry_postsh_1</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$00000009))
 
 <P><STRONG><a name="[78]"></a>__rt_entry_main</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, __rtentry2.o(.ARM.Collect$$rtentry$$0000000D))
-<BR><BR>[Stack]<UL><LI>Max Depth = 40 + Unknown Stack Size
-<LI>Call Chain = __rt_entry_main &rArr; main &rArr; GPIO_Init &rArr; initLCD &rArr; lcd_command &rArr; delay_us
+<BR><BR>[Stack]<UL><LI>Max Depth = 24 + Unknown Stack Size
+<LI>Call Chain = __rt_entry_main &rArr; main &rArr; GPIO_Init &rArr; initLCD &rArr; lcd_command
 </UL>
 <BR>[Calls]<UL><LI><a href="#[7a]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;exit
 <LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
@@ -663,15 +664,23 @@ Global Symbols
 <BR><BR>[Called By]<UL><LI><a href="#[75]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__user_setup_stackheap
 </UL>
 
-<P><STRONG><a name="[88]"></a>PLL_Init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, utils.o(.text))
+<P><STRONG><a name="[87]"></a>PLL_Init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, utils.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[89]"></a>SysTick_Init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, utils.o(.text))
+<P><STRONG><a name="[88]"></a>SysTick_Init</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, utils.o(.text))
 <BR><BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[b2]"></a>SysTick_Wait1ms</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, utils.o(.text), UNUSED)
+<P><STRONG><a name="[85]"></a>SysTick_Wait1ms</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, utils.o(.text))
+<BR><BR>[Called By]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_command
+<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initLCD
+<LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetLCD
+<LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_data
+<LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
+</UL>
+
+<P><STRONG><a name="[b2]"></a>SysTick_Wait1us</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, utils.o(.text), UNUSED)
 
 <P><STRONG><a name="[b3]"></a>__use_two_region_memory</STRONG> (Thumb, 2 bytes, Stack size 0 bytes, heapauxi.o(.text), UNUSED)
 
@@ -716,67 +725,66 @@ Global Symbols
 
 <P><STRONG><a name="[ba]"></a>__semihosting_library_function</STRONG> (Thumb, 0 bytes, Stack size unknown bytes, indicate_semi.o(.text), UNUSED)
 
-<P><STRONG><a name="[82]"></a>GPIO_Init</STRONG> (Thumb, 178 bytes, Stack size 4 bytes, gpio.o(i.GPIO_Init))
-<BR><BR>[Stack]<UL><LI>Max Depth = 32<LI>Call Chain = GPIO_Init &rArr; initLCD &rArr; lcd_command &rArr; delay_us
+<P><STRONG><a name="[82]"></a>GPIO_Init</STRONG> (Thumb, 178 bytes, Stack size 8 bytes, gpio.o(i.GPIO_Init))
+<BR><BR>[Stack]<UL><LI>Max Depth = 24 + Unknown Stack Size
+<LI>Call Chain = GPIO_Init &rArr; initLCD &rArr; lcd_command
 </UL>
 <BR>[Calls]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initLCD
 </UL>
 <BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[84]"></a>delay_ms</STRONG> (Thumb, 24 bytes, Stack size 8 bytes, gpio.o(i.delay_ms))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = delay_ms &rArr; delay_us
+<P><STRONG><a name="[83]"></a>initLCD</STRONG> (Thumb, 52 bytes, Stack size 8 bytes, gpio.o(i.initLCD))
+<BR><BR>[Stack]<UL><LI>Max Depth = 16 + Unknown Stack Size
+<LI>Call Chain = initLCD &rArr; lcd_command
 </UL>
-<BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
-</UL>
-<BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initLCD
-</UL>
-
-<P><STRONG><a name="[85]"></a>delay_us</STRONG> (Thumb, 40 bytes, Stack size 16 bytes, gpio.o(i.delay_us))
-<BR><BR>[Stack]<UL><LI>Max Depth = 16<LI>Call Chain = delay_us
-</UL>
-<BR>[Called By]<UL><LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_command
-<LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initLCD
-<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
-<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_data
-</UL>
-
-<P><STRONG><a name="[83]"></a>initLCD</STRONG> (Thumb, 52 bytes, Stack size 4 bytes, gpio.o(i.initLCD))
-<BR><BR>[Stack]<UL><LI>Max Depth = 28<LI>Call Chain = initLCD &rArr; lcd_command &rArr; delay_us
-</UL>
-<BR>[Calls]<UL><LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_command
-<LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
-<LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_ms
+<BR>[Calls]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_command
+<LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Wait1ms
 </UL>
 <BR>[Called By]<UL><LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_Init
 </UL>
 
-<P><STRONG><a name="[86]"></a>lcd_command</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, gpio.o(i.lcd_command))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = lcd_command &rArr; delay_us
+<P><STRONG><a name="[84]"></a>lcd_command</STRONG> (Thumb, 60 bytes, Stack size 8 bytes, gpio.o(i.lcd_command))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8 + Unknown Stack Size
+<LI>Call Chain = lcd_command
 </UL>
-<BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Wait1ms
 </UL>
 <BR>[Called By]<UL><LI><a href="#[83]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;initLCD
+<LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetLCD
 </UL>
 
-<P><STRONG><a name="[87]"></a>lcd_data</STRONG> (Thumb, 70 bytes, Stack size 8 bytes, gpio.o(i.lcd_data))
-<BR><BR>[Stack]<UL><LI>Max Depth = 24<LI>Call Chain = lcd_data &rArr; delay_us
+<P><STRONG><a name="[86]"></a>lcd_data</STRONG> (Thumb, 70 bytes, Stack size 8 bytes, gpio.o(i.lcd_data))
+<BR><BR>[Stack]<UL><LI>Max Depth = 8 + Unknown Stack Size
+<LI>Call Chain = lcd_data
 </UL>
-<BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;delay_us
+<BR>[Calls]<UL><LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Wait1ms
 </UL>
 <BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
-<P><STRONG><a name="[79]"></a>main</STRONG> (Thumb, 48 bytes, Stack size 8 bytes, main.o(i.main))
-<BR><BR>[Stack]<UL><LI>Max Depth = 40 + Unknown Stack Size
-<LI>Call Chain = main &rArr; GPIO_Init &rArr; initLCD &rArr; lcd_command &rArr; delay_us
+<P><STRONG><a name="[79]"></a>main</STRONG> (Thumb, 58 bytes, Stack size 0 bytes, main.o(i.main))
+<BR><BR>[Stack]<UL><LI>Max Depth = 24 + Unknown Stack Size
+<LI>Call Chain = main &rArr; GPIO_Init &rArr; initLCD &rArr; lcd_command
 </UL>
-<BR>[Calls]<UL><LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_data
+<BR>[Calls]<UL><LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;resetLCD
+<LI><a href="#[86]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_data
 <LI><a href="#[82]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;GPIO_Init
-<LI><a href="#[89]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Init
-<LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PLL_Init
+<LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Wait1ms
+<LI><a href="#[88]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Init
+<LI><a href="#[87]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;PLL_Init
 </UL>
 <BR>[Called By]<UL><LI><a href="#[78]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;__rt_entry_main
+</UL>
+
+<P><STRONG><a name="[89]"></a>resetLCD</STRONG> (Thumb, 16 bytes, Stack size 8 bytes, gpio.o(i.resetLCD))
+<BR><BR>[Stack]<UL><LI>Max Depth = 16 + Unknown Stack Size
+<LI>Call Chain = resetLCD &rArr; lcd_command
+</UL>
+<BR>[Calls]<UL><LI><a href="#[84]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;lcd_command
+<LI><a href="#[85]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;SysTick_Wait1ms
+</UL>
+<BR>[Called By]<UL><LI><a href="#[79]">&gt;&gt;</a>&nbsp;&nbsp;&nbsp;main
 </UL>
 
 <P><STRONG><a name="[73]"></a>_fp_init</STRONG> (Thumb, 10 bytes, Stack size 0 bytes, fpinit.o(x$fpl$fpinit))
