@@ -30,10 +30,12 @@ Build target 'Target 1'
 compiling main.c...
 main.c(19): warning:  #1295-D: Deprecated declaration resetLCD - give arg types
   void resetLCD();
-main.c: 1 warning, 0 errors
+main.c(28): warning:  #177-D: variable "senha_mestra"  was declared but never referenced
+  	uint32_t senha_mestra = 1234;
+main.c: 2 warnings, 0 errors
 linking...
-Program Size: Code=1864 RO-data=16 RW-data=0 ZI-data=1120  
-".\Objects\exemplo.axf" - 0 Error(s), 1 Warning(s).
+Program Size: Code=2228 RO-data=32 RW-data=0 ZI-data=1120  
+".\Objects\exemplo.axf" - 0 Error(s), 2 Warning(s).
 
 <h2>Software Packages used:</h2>
 
