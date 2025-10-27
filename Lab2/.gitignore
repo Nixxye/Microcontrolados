@@ -1,0 +1,47 @@
+# .gitignore - configurações básicas para projeto de microcontroladores
+
+# Visual Studio Code
+.vscode/
+
+# Build artifacts (IDE/toolchain)
+Objects/
+Listings/
+*.axf
+*.lnp
+*.map
+*.hex
+*.bin
+*.elf
+*.o
+*.obj
+*.lst
+*.htm
+*.dep
+*.d
+*.crf
+
+# Linker and debug files
+*.lst
+*.map
+*.elf
+
+# Temporary / backup files
+*.log
+*.tmp
+*~
+*.swp
+*.bak
+
+# OS generated files
+.DS_Store
+Thumbs.db
+
+# Environment / virtualenv (if applicable)
+venv/
+.env
+
+# Misc
+*.bak
+*.old
+
+# End of file

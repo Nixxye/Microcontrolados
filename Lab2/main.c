@@ -4,63 +4,201 @@
 // Caso as duas chaves estejam pressionadas ao mesmo tempo pisca os LEDs alternadamente a cada 500ms.
 // Prof. Guilherme Peron
 
-#include <stdint.h>
+#include "main.h"
 
-void PLL_Init(void);
-void SysTick_Init(void);
-void SysTick_Wait1ms(uint32_t delay);
-void SysTick_Wait1us(uint32_t delay);
-void GPIO_Init(void);
-uint32_t PortJ_Input(void);
-void PortN_Output(uint32_t leds);
-void Pisca_leds(void);
-void lcd_data(uint8_t data);
-void lcd_puts(char *s);
-void resetLCD();
-char Keypad_Scan(void);
+static char user_password[USER_PASS_LEN + 1] = "0000"; // inicial temporária
+static const char master_password[] = "1234";
+
+/* Flag setada pela ISR quando USR_SW1 é pressionada (falling edge) */
+volatile int usr_sw1_event = 0;
 
 int main(void)
 {
 	PLL_Init();
-	SysTick_Init();
-	GPIO_Init();
+    SysTick_Init();
+    GPIO_Init();
+    USR_SW1_IntInit();
 
 	uint32_t senha_mestra = 1234;
-	char tecla = '\0';
 
-	while(1) {
-		resetLCD();
-		// Quando o sistema iniciar, o cofre devera estar aberto, sendo indicado pelo LCD "Cofre aberto".
-		lcd_puts("Cofre aberto");
-		// Se o usuario quiser fechar o cofre, basta ele digitar no teclado uma senha de 4 digitos e em seguida o "#""; 
-		// Assim que a "#" for pressionada, o cofre deve esperar por 1 segundo e, em seguida, o motor de passo deve girar 2 voltas no sentido anti-horario no modo meio passo. Neste momento, o  LCD deve indicar a mensagem "Cofre fechando";
-		lcd_puts("Cofre fechando");
-		// Assim que o cofre for fechado e em todo momento em que estiver fechado, o LCD deve mostrar a mensagem 'Cofre fechado'. Sendo aceita somente a senha previamente cadastrada para abrir o cofre;
-		lcd_puts("Cofre fechado");
-		// Se a senha for digitada corretamente, o motor de passo deve girar 2 voltas no sentido horario no modo passo completo. Neste momento, o  LCD deve indicar a mensagem 'Cofre abrindo'; 
-		lcd_puts("Cofre abrindo");
-		// Se, enquanto o cofre estiver fechado, a senha for digitada incorretamente por 3 vezes, o cofre travara. Os LEDs da PAT devem ficar piscando e o LCD deve apresentar a mensagem "Cofre Travado". Neste caso, o cofre so podera ser aberto pressionando a chave USR_SW1 acionada por interrupcao de GPIO. Em seguida a senha mestra devera ser requisitada. A senha mestra so podera ser digitada se a chave USR_SW1 for pressionada.
-		lcd_puts("Cofre Travado");
+	CofreState state = STATE_ABERTO;
+    int failed_attempts = 0;
+    char input_buf[MAX_INPUT_LEN];
+    int input_len = 0;
 
-		// Assim que o cofre abrir completamente, voltar ao passo 1, ou seja, o LCD deve indicar a mensagem 'Cofre aberto'.
-		// O sistema deve ter uma senha mestra que sera inicializada como 1234, para permitir a abertura do cofre em caso de travamento.
-		// Se a senha mestra for digitada corretamente, os 8 LEDs da PAT devem parar de piscar, e, em seguida, o cofre deve ser aberto, indicado pelo LCD como do passo 5.
+    while (1) {
+        switch (state) {
+            case STATE_ABERTO:
+                resetLCD();
+                lcd_puts("Cofre aberto");
+                // Espera senha de 4 dígitos seguida de '#'
+                collect_password(input_buf, &input_len, USER_PASS_LEN + 1);
+                if (input_len == USER_PASS_LEN) {
+                    // Armazena senha do usuário
+                    memcpy(user_password, input_buf, USER_PASS_LEN);
+                    user_password[USER_PASS_LEN] = '\0';
+                    // Fecha o cofre
+					state = STATE_FECHANDO;
+                } else {
+                    resetLCD();
+                	lcd_puts("Tamanho invalido");
+                    SysTick_Wait1ms(1000);
+                }
+                break;
 
-		// Utilizar o algoritmo de varredura para realizar a leitura das teclas do teclado matricial. Para colocar um pino em alta impedancia atribuir o respectivo bit do GPIO_DIR para entrada. A cada troca de entrada para saida e saida para entrada, esperar no minimo 1 ms. 
-		
-		tecla = Keypad_Scan();
-		if (tecla != '\0') {
-			lcd_data(tecla);
-			tecla = '\0';
-		}
-		SysTick_Wait1ms(1000);
-	}
+            case STATE_FECHADO:
+                resetLCD();
+                lcd_puts("Cofre fechado");
+                // Aguarda tentativa de abertura (senha seguida de '#')
+                collect_password(input_buf, &input_len, USER_PASS_LEN + 1);
+                if (input_len == USER_PASS_LEN) {
+                    if (strncmp(input_buf, user_password, USER_PASS_LEN) == 0) {
+                        // Senha correta -> abre
+                        state = STATE_ABRINDO;
+                    } else {
+                        // Senha incorreta
+                        failed_attempts++;
+                        resetLCD();
+                        lcd_puts("Senha incorreta");
+                        SysTick_Wait1ms(1000);
+                        if (failed_attempts >= 3) {
+                            state = STATE_TRAVADO;
+                        }
+                    }
+                } else {
+					resetLCD();
+                	lcd_puts("Tamanho invalido");
+                    SysTick_Wait1ms(1000);
+                }
+                break;
+
+            case STATE_TRAVADO:
+                // Exibe mensagem e pisca LEDs até que USR_SW1 seja pressionada
+                resetLCD();
+                lcd_puts("Cofre Travado");
+                // Loop de espera que pisca LEDs e checa USR_SW1
+				Pisca_leds(); // pisca alternadamente
+				if (usr_sw1_event) {
+					usr_sw1_event = 0;
+					
+					// Quando USR_SW1 for detectada, pede senha mestra
+					collect_password(input_buf, &input_len, USER_PASS_LEN + 1);
+					if (input_len == USER_PASS_LEN) {
+						if(strncmp(input_buf, master_password, USER_PASS_LEN) == 0) {
+							// Mestre ok -> abrir e voltar a aberto
+							stepper_open();
+							state = STATE_ABRINDO;
+							failed_attempts = 0;
+						} else {
+							resetLCD();
+							lcd_puts("Mestre invalida");
+							SysTick_Wait1ms(1000);
+						}
+					} else {
+						resetLCD();
+						lcd_puts("Tamanho invalido");
+						SysTick_Wait1ms(1000);
+					}
+				}
+                break;
+
+            case STATE_FECHANDO:
+                // Estado transitório (se precisar de algo específico)
+				resetLCD();
+				lcd_puts("Cofre fechando");
+				stepper_close();
+				state = STATE_FECHADO;
+				failed_attempts = 0;
+                break;
+
+            case STATE_ABRINDO:
+                // Estado transitório (se precisar de algo específico)
+				resetLCD();
+				lcd_puts("Cofre abrindo");
+				stepper_open();
+                state = STATE_ABERTO;
+                break;
+
+            default:
+                state = STATE_ABERTO;
+                break;
+        } // switch
+
+        // pequeno intervalo para evitar busy-loop extremo
+        SysTick_Wait1ms(50);
+    }
 }
 
 void Pisca_leds(void)
 {
+	// Aqui precisa ser os LEDs da PAT não da placa vermelha
+	/* Cada LED mapeado em:
+		PA7
+		PA6
+		PA5
+		PA4
+		PQ3
+		PQ2
+		PQ1
+		PQ0
+	*/
+	// Precisa fazer o negocio com o transistor lá usando a porta PP5
+
 	PortN_Output(0x2);
 	SysTick_Wait1ms(250);
 	PortN_Output(0x1);
 	SysTick_Wait1ms(250);
+}
+
+/* Coleta uma senha até '#' ser pressionado.
+   - buf: buffer de saída
+   - len: saída com comprimento (sem o terminador)
+   - maxlen: tamanho máximo (inclui espaço para terminador, e.g. USER_PASS_LEN+1)
+   Observação: bloqueante até '#' ser pressionado. Aceita tecla '*' para limpar. */
+void collect_password(char *buf, int *len, int maxlen) {
+    int idx = 0;
+    *len = 0;
+	char k;
+    // indica visualmente entrada opcionalmente
+    while (1) {
+		k = '\0';
+        k = Keypad_Scan();
+        if (k == '*') {
+            // limpar
+            idx = 0;
+            *len = 0;
+            continue;
+        }
+        if (k == '#') {
+            if (idx >= 0 && idx < maxlen) 
+				buf[idx] = '\0';
+            else 
+				buf[maxlen - 1] = '\0';
+            *len = idx;
+            return;
+        }
+        // aceita apenas dígitos e caracteres aceitos (A-D,*,# também podem aparecer)
+        if (k != '\0' && idx < maxlen - 1) {
+            buf[idx++] = k;
+            SysTick_Wait1ms(200);
+        }
+    }
+}
+
+/* Simulações simples do motor de passo (apenas delays e mensagem) */
+void stepper_close(void) {
+    // aguarda 1s antes de girar (conforme enunciado)
+    SysTick_Wait1ms(1000);
+    // simula tempo de 2 voltas no sentido anti-horário no modo meio passo
+    SysTick_Wait1ms(2000);
+}
+
+void stepper_open(void) {
+	// simula tempo de 2 voltas no sentido horário no modo passo completo
+    SysTick_Wait1ms(2000);
+}
+
+/* Leitura simples da chave USR_SW1: Port J bit 0 (pull-up, 0 quando pressionado) */
+int usr_sw1_pressed(void) {
+    return (PortJ_Input() & 0x01) == 0;
 }

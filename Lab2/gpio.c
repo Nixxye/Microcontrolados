@@ -3,12 +3,11 @@
 // Inicializa as portas J, N, K e M
 // Prof. Guilherme Peron
 
-
 #include <stdint.h>
 
 #include "tm4c1294ncpdt.h"
+#include "main.h"
 
- 
 #define GPIO_PORTA (0x0001)
 #define GPIO_PORTJ (0x0100)
 #define GPIO_PORTK (0x0200)
@@ -33,6 +32,43 @@ uint32_t PortJ_Input(void)
 }
 
 // -------------------------------------------------------------------------------
+// Função usr_sw1_pressed
+// Verifica se a chave USR_SW1 está pressionada
+// Parâmetro de entrada: Não tem
+// Parâmetro de saída: 1 se pressionada, 0 caso contrário
+void USR_SW1_IntInit(void)
+{
+    // Assegure que o clock da GPIO J já foi habilitado (GPIO_Init chama isso).
+    // Configurar como borda (edge) sensível:
+    GPIO_PORTJ_AHB_IS_R &= ~0x01;  // IS = 0 -> edge-sensitive for bit0
+    GPIO_PORTJ_AHB_IBE_R &= ~0x01; // IBE = 0 -> not both edges
+    GPIO_PORTJ_AHB_IEV_R &= ~0x01; // IEV = 0 -> falling edge (1->0)
+
+    // Limpar qualquer interrupção pendente
+    GPIO_PORTJ_AHB_ICR_R = 0x01;
+
+    // Desmascarar a interrupção do pin0
+    GPIO_PORTJ_AHB_IM_R |= 0x01;
+
+    // Habilitar interrupção no NVIC para GPIOJ
+    // INT_GPIOJ é definido em tm4c1294ncpdt.h (valor 67)
+    // Como 67 >= 64, usamos NVIC_EN2_R (cobertura: 64..95)
+    NVIC_EN2_R = (1 << (INT_GPIOJ - 64));
+}
+
+// -------------------------------------------------------------------------------
+// Função GPIOPortJ_Handler
+// Rotina de tratamento da interrupção do PortJ (USR_SW1)
+void GPIOPortJ_Handler(void)
+{
+    // Limpa o evento de interrupção para o pin0
+    GPIO_PORTJ_AHB_ICR_R = 0x01;
+
+    // Sinaliza para o código principal que a tecla foi pressionada
+    usr_sw1_event = 1;
+}
+
+// -------------------------------------------------------------------------------
 // Função PortN_Output
 // Escreve os valores no port N
 // Parâmetro de entrada: Valor a ser escrito
@@ -40,12 +76,12 @@ uint32_t PortJ_Input(void)
 void PortN_Output(uint32_t valor)
 {
     uint32_t temp;
-    //vamos zerar somente os bits menos significativos
-    //para uma escrita amigável nos bits 0 e 1
+    // vamos zerar somente os bits menos significativos
+    // para uma escrita amigável nos bits 0 e 1
     temp = GPIO_PORTN_DATA_R & 0xFC;
-    //agora vamos fazer o OR com o valor recebido na função
+    // agora vamos fazer o OR com o valor recebido na função
     temp = temp | valor;
-    GPIO_PORTN_DATA_R = temp; 
+    GPIO_PORTN_DATA_R = temp;
 }
 
 // --- Funções do LCD ---
@@ -57,27 +93,29 @@ void PortN_Output(uint32_t valor)
  * - R/W = PM1 (sempre 0)
  * - E  = PM2
  */
-void lcd_command(uint8_t command) {
+void lcd_command(uint8_t command)
+{
     // Configura RS=0, R/W=0, E=0
     // (Limpa bits PM0, PM1, PM2)
-    GPIO_PORTM_DATA_R &= ~0x07; 
+    GPIO_PORTM_DATA_R &= ~0x07;
 
     // Coloca o comando no barramento de dados (Port K)
     GPIO_PORTK_DATA_R = command;
 
     // Gera um pulso em 'E' (PM2)
     // Seta PM2 (E=1)
-    GPIO_PORTM_DATA_R |= 0x04; 
+    GPIO_PORTM_DATA_R |= 0x04;
     SysTick_Wait1ms(2); // Duração do pulso
 
     // Finaliza o pulso em 'E' (PM2)
     // Limpa PM2 (E=0)
-    GPIO_PORTM_DATA_R &= ~0x04; 
+    GPIO_PORTM_DATA_R &= ~0x04;
 }
 
-void resetLCD() {
-	lcd_command(0x01);
-	SysTick_Wait1ms(2); // Espera 2ms (1.64ms é o mínimo)
+void resetLCD()
+{
+    lcd_command(0x01);
+    SysTick_Wait1ms(2); // Espera 2ms (1.64ms é o mínimo)
 }
 
 /**
@@ -87,8 +125,9 @@ void resetLCD() {
  * - R/W = PM1 (sempre 0)
  * - E  = PM2
  */
-void lcd_data(uint8_t data) {
-    
+void lcd_data(uint8_t data)
+{
+
     // 1. Configura RS=1, R/W=0, E=0
     //    Seta PM0 (RS=1), Limpa PM1 (R/W=0), Limpa PM2 (E=0)
     GPIO_PORTM_DATA_R = (GPIO_PORTM_DATA_R & ~0x06) | 0x01;
@@ -99,7 +138,7 @@ void lcd_data(uint8_t data) {
     // 3. Gera um pulso em 'E' (PM2)
     //    Seta PM2 (E=1)
     GPIO_PORTM_DATA_R |= 0x04;
-    SysTick_Wait1ms(2); 
+    SysTick_Wait1ms(2);
 
     //    Limpa PM2 (E=0)
     GPIO_PORTM_DATA_R &= ~0x04;
@@ -111,14 +150,17 @@ void lcd_data(uint8_t data) {
 /**
  * Escreve uma string (vários caracteres) no LCD
  */
-void lcd_puts(char *s) {
-    while (*s) {
+void lcd_puts(char *s)
+{
+    while (*s)
+    {
         lcd_data(*s);
         s++;
     }
 }
 
-void initLCD() {
+void initLCD()
+{
     // 1. Inicializar no modo 2 linhas / caracter matriz 5x7 (0x38)
     lcd_command(0x38);
     SysTick_Wait1ms(40);
@@ -144,7 +186,8 @@ void initLCD() {
  * Linhas (Entrada): PL0, PL1, PL2, PL3
  * Retorna o caractere da tecla pressionada, ou '\0' (nulo) se nenhuma.
  */
-char Keypad_Scan(void) {
+char Keypad_Scan(void)
+{
     // Mapeamento de teclas [coluna][linha]
     // Col 0 = PM4, Col 1 = PM5, Col 2 = PM6, Col 3 = PM7
     // Linha 0 = PL0, Linha 1 = PL1, Linha 2 = PL2, Linha 3 = PL3
@@ -159,7 +202,8 @@ char Keypad_Scan(void) {
     uint32_t lines;
     int i, j;
 
-    for (i = 0; i < 4; i++) {
+    for (i = 0; i < 4; i++)
+    {
         // 'i' representa a coluna (0 a 3)
         // O pino da coluna atual é (PM4 + i)
         col_pin = (1 << (i + 4)); // 0x10, 0x20, 0x40, 0x80
@@ -168,7 +212,7 @@ char Keypad_Scan(void) {
         //    - Todas as colunas do teclado (PM4-PM7) como entrada (Hi-Z)
         //    - Manter LCD (PM0-PM2) como saída
         GPIO_PORTM_DIR_R = (GPIO_PORTM_DIR_R & ~0xF0) | 0x07;
-        
+
         // 2. Configurar a coluna ATUAL (col_pin) como saída
         GPIO_PORTM_DIR_R |= col_pin;
 
@@ -176,22 +220,25 @@ char Keypad_Scan(void) {
         //    (Garante que não afeta os pinos do LCD PM0-PM2)
         uint32_t current_portm_data = GPIO_PORTM_DATA_R;
         GPIO_PORTM_DATA_R = (current_portm_data & ~col_pin);
-        
+
         SysTick_Wait1ms(5); // Pequeno delay para estabilizar o sinal
 
         // 4. Verificar o valor de leitura das linhas (PL0-PL3)
         lines = GPIO_PORTL_DATA_R & 0x0F;
 
         // 5. Se algum bit for 0, uma tecla foi pressionada
-        if (lines != 0x0F) {
-            for (j = 0; j < 4; j++) {
+        if (lines != 0x0F)
+        {
+            for (j = 0; j < 4; j++)
+            {
                 // 'j' representa a linha (0 a 3)
-                if ((lines & (1 << j)) == 0) {
+                if ((lines & (1 << j)) == 0)
+                {
                     // 6. Encerra a varredura e retorna a tecla
-                    
+
                     // Restaura colunas para entrada antes de sair
                     GPIO_PORTM_DIR_R = (GPIO_PORTM_DIR_R & ~0xF0) | 0x07;
-                    
+
                     return keymap[i][j];
                 }
             }
@@ -204,87 +251,88 @@ char Keypad_Scan(void) {
     return '\0'; // Retorna nulo
 }
 
-
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
 // Inicializa os ports J, N (para usuário) e K, M (para o LCD)
 // Parâmetro de entrada: Não tem
 // Parâmetro de saída: Não tem
-void GPIO_Init(void) {
-	// 1a. Ativar o clock para a porta setando o bit correspondente no registrador
-	// RCGCGPIO
-	SYSCTL_RCGCGPIO_R =
-		(GPIO_PORTA | GPIO_PORTJ | GPIO_PORTK | GPIO_PORTL | GPIO_PORTM |
-		GPIO_PORTN | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP);
-	// 1b.   ap�s isso verificar no PRGPIO se a porta est� pronta para uso.
-	while ((SYSCTL_PRGPIO_R &
-			(GPIO_PORTA | GPIO_PORTJ | GPIO_PORTK | GPIO_PORTL | GPIO_PORTM |
-			GPIO_PORTN | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP)) !=
-			(GPIO_PORTA | GPIO_PORTJ | GPIO_PORTK | GPIO_PORTL | GPIO_PORTM |
-			GPIO_PORTN | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP)) {
-	};
-	SYSCTL_RCGCTIMER_R = 0x1;
-	while ((SYSCTL_PRTIMER_R & (0x1)) != (0x1))
-		;
+void GPIO_Init(void)
+{
+    // 1a. Ativar o clock para a porta setando o bit correspondente no registrador
+    // RCGCGPIO
+    SYSCTL_RCGCGPIO_R =
+        (GPIO_PORTA | GPIO_PORTJ | GPIO_PORTK | GPIO_PORTL | GPIO_PORTM |
+         GPIO_PORTN | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP);
+    // 1b.   ap�s isso verificar no PRGPIO se a porta est� pronta para uso.
+    while ((SYSCTL_PRGPIO_R &
+            (GPIO_PORTA | GPIO_PORTJ | GPIO_PORTK | GPIO_PORTL | GPIO_PORTM |
+             GPIO_PORTN | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP)) !=
+           (GPIO_PORTA | GPIO_PORTJ | GPIO_PORTK | GPIO_PORTL | GPIO_PORTM |
+            GPIO_PORTN | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP))
+    {
+    };
+    SYSCTL_RCGCTIMER_R = 0x1;
+    while ((SYSCTL_PRTIMER_R & (0x1)) != (0x1))
+        ;
 
-	// 2. Limpar o AMSEL para desabilitar a anal�gica
-	GPIO_PORTJ_AHB_AMSEL_R = 0x00;
-	GPIO_PORTN_AMSEL_R = 0x00;
-	GPIO_PORTL_AMSEL_R = 0x00;
-	GPIO_PORTM_AMSEL_R = 0x00;
-	GPIO_PORTA_AHB_AMSEL_R = 0x00;
-	GPIO_PORTQ_AMSEL_R = 0x00;
-	GPIO_PORTK_AMSEL_R = 0x00;
-	GPIO_PORTH_AHB_AMSEL_R = 0x00;
-	GPIO_PORTP_AMSEL_R = 0x00;
+    // 2. Limpar o AMSEL para desabilitar a anal�gica
+    GPIO_PORTJ_AHB_AMSEL_R = 0x00;
+    GPIO_PORTN_AMSEL_R = 0x00;
+    GPIO_PORTL_AMSEL_R = 0x00;
+    GPIO_PORTM_AMSEL_R = 0x00;
+    GPIO_PORTA_AHB_AMSEL_R = 0x00;
+    GPIO_PORTQ_AMSEL_R = 0x00;
+    GPIO_PORTK_AMSEL_R = 0x00;
+    GPIO_PORTH_AHB_AMSEL_R = 0x00;
+    GPIO_PORTP_AMSEL_R = 0x00;
 
-	// 3. Limpar PCTL para selecionar o GPIO
-	GPIO_PORTJ_AHB_PCTL_R = 0x00;
-	GPIO_PORTN_PCTL_R = 0x00;
-	GPIO_PORTL_PCTL_R = 0x00;
-	GPIO_PORTM_PCTL_R = 0x00;
-	GPIO_PORTA_AHB_PCTL_R = 0x00;
-	GPIO_PORTQ_PCTL_R = 0x00;
-	GPIO_PORTK_PCTL_R = 0x00;
-	GPIO_PORTP_PCTL_R = 0x00;
-	GPIO_PORTH_AHB_PCTL_R = 0x00;
+    // 3. Limpar PCTL para selecionar o GPIO
+    GPIO_PORTJ_AHB_PCTL_R = 0x00;
+    GPIO_PORTN_PCTL_R = 0x00;
+    GPIO_PORTL_PCTL_R = 0x00;
+    GPIO_PORTM_PCTL_R = 0x00;
+    GPIO_PORTA_AHB_PCTL_R = 0x00;
+    GPIO_PORTQ_PCTL_R = 0x00;
+    GPIO_PORTK_PCTL_R = 0x00;
+    GPIO_PORTP_PCTL_R = 0x00;
+    GPIO_PORTH_AHB_PCTL_R = 0x00;
 
-	// 4. DIR para 0 se for entrada, 1 se for sa�da
-	GPIO_PORTJ_AHB_DIR_R = 0x00;
-	GPIO_PORTL_DIR_R = 0x00;
-	GPIO_PORTM_DIR_R = 0x07;
-	GPIO_PORTN_DIR_R = 0x03;
-	GPIO_PORTA_AHB_DIR_R = 0xF0; // BIT4 AO BIT7
-	GPIO_PORTQ_DIR_R = 0x0F;     // BIT0, 1, 2, 3
-	GPIO_PORTK_DIR_R = 0xFF;
-	GPIO_PORTP_DIR_R = 0x20;
-	GPIO_PORTH_AHB_DIR_R = 0x0F;
+    // 4. DIR para 0 se for entrada, 1 se for sa�da
+    GPIO_PORTJ_AHB_DIR_R = 0x00;
+    GPIO_PORTL_DIR_R = 0x00;
+    GPIO_PORTM_DIR_R = 0x07;
+    GPIO_PORTN_DIR_R = 0x03;
+    GPIO_PORTA_AHB_DIR_R = 0xF0; // BIT4 AO BIT7
+    GPIO_PORTQ_DIR_R = 0x0F;     // BIT0, 1, 2, 3
+    GPIO_PORTK_DIR_R = 0xFF;
+    GPIO_PORTP_DIR_R = 0x20;
+    GPIO_PORTH_AHB_DIR_R = 0x0F;
 
-	// 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem fun��o alternativa
-	GPIO_PORTJ_AHB_AFSEL_R = 0x00;
-	GPIO_PORTL_AFSEL_R = 0x00;
-	GPIO_PORTM_AFSEL_R = 0x00;
-	GPIO_PORTN_AFSEL_R = 0x00;
-	GPIO_PORTA_AHB_AFSEL_R = 0x00;
-	GPIO_PORTQ_AFSEL_R = 0x00;
-	GPIO_PORTK_AFSEL_R = 0x00;
-	GPIO_PORTP_AFSEL_R = 0x00;
-	GPIO_PORTH_AHB_AFSEL_R = 0x00;
+    // 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem fun��o alternativa
+    GPIO_PORTJ_AHB_AFSEL_R = 0x00;
+    GPIO_PORTL_AFSEL_R = 0x00;
+    GPIO_PORTM_AFSEL_R = 0x00;
+    GPIO_PORTN_AFSEL_R = 0x00;
+    GPIO_PORTA_AHB_AFSEL_R = 0x00;
+    GPIO_PORTQ_AFSEL_R = 0x00;
+    GPIO_PORTK_AFSEL_R = 0x00;
+    GPIO_PORTP_AFSEL_R = 0x00;
+    GPIO_PORTH_AHB_AFSEL_R = 0x00;
 
-	// 6. Setar os bits de DEN para habilitar I/O digital
-	GPIO_PORTJ_AHB_DEN_R = 0x03; // Bit0 e bit1
-	GPIO_PORTL_DEN_R = 0x0F;     // Bit0, 1, 2, 3
-	GPIO_PORTM_DEN_R = 0xF7;     //
-	GPIO_PORTN_DEN_R = 0x03;     // Bit0 e bit1
-	GPIO_PORTA_AHB_DEN_R = 0xF0; // BIT4 AO BIT7
-	GPIO_PORTQ_DEN_R = 0x0F;     // BIT0, 1, 2, 3
-	GPIO_PORTK_DEN_R = 0xFF;     // todos
-	GPIO_PORTP_DEN_R = 0x20;     // todos
-	GPIO_PORTH_AHB_DEN_R = 0x0F; // BIT4 AO BIT7
+    // 6. Setar os bits de DEN para habilitar I/O digital
+    GPIO_PORTJ_AHB_DEN_R = 0x03; // Bit0 e bit1
+    GPIO_PORTL_DEN_R = 0x0F;     // Bit0, 1, 2, 3
+    GPIO_PORTM_DEN_R = 0xF7;     //
+    GPIO_PORTN_DEN_R = 0x03;     // Bit0 e bit1
+    GPIO_PORTA_AHB_DEN_R = 0xF0; // BIT4 AO BIT7
+    GPIO_PORTQ_DEN_R = 0x0F;     // BIT0, 1, 2, 3
+    GPIO_PORTK_DEN_R = 0xFF;     // todos
+    GPIO_PORTP_DEN_R = 0x20;     // todos
+    GPIO_PORTH_AHB_DEN_R = 0x0F; // BIT4 AO BIT7
 
-	// 7. Habilitar resistor de pull-up interno, setar PUR para 1
-	GPIO_PORTJ_AHB_PUR_R = 0x03; // Bit0 e bit1
-	GPIO_PORTL_PUR_R = 0x0F;     // Bit0, 1, 2, 3
+    // 7. Habilitar resistor de pull-up interno, setar PUR para 1
+    GPIO_PORTJ_AHB_PUR_R = 0x03; // Bit0 e bit1
+    GPIO_PORTL_PUR_R = 0x0F;     // Bit0, 1, 2, 3
 
     // Inicializa o LCD após configurar todas as portas
     initLCD();
