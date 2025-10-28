@@ -32,35 +32,12 @@ uint32_t PortJ_Input(void)
 }
 
 // -------------------------------------------------------------------------------
-// Função usr_sw1_pressed
-// Verifica se a chave USR_SW1 está pressionada
-// Parâmetro de entrada: Não tem
-// Parâmetro de saída: 1 se pressionada, 0 caso contrário
-void USR_SW1_IntInit(void)
-{
-    // Assegure que o clock da GPIO J já foi habilitado (GPIO_Init chama isso).
-    // Configurar como borda (edge) sensível:
-    GPIO_PORTJ_AHB_IS_R &= ~0x01;  // IS = 0 -> edge-sensitive for bit0
-    GPIO_PORTJ_AHB_IBE_R &= ~0x01; // IBE = 0 -> not both edges
-    GPIO_PORTJ_AHB_IEV_R &= ~0x01; // IEV = 0 -> falling edge (1->0)
-
-    // Limpar qualquer interrupção pendente
-    GPIO_PORTJ_AHB_ICR_R = 0x01;
-
-    // Desmascarar a interrupção do pin0
-    GPIO_PORTJ_AHB_IM_R |= 0x01;
-
-    // Habilitar interrupção no NVIC para GPIOJ
-    // INT_GPIOJ é definido em tm4c1294ncpdt.h (valor 67)
-    // Como 67 >= 64, usamos NVIC_EN2_R (cobertura: 64..95)
-    NVIC_EN2_R = (1 << (INT_GPIOJ - 64));
-}
-
-// -------------------------------------------------------------------------------
 // Função GPIOPortJ_Handler
 // Rotina de tratamento da interrupção do PortJ (USR_SW1)
 void GPIOPortJ_Handler(void)
 {
+    if ((GPIO_PORTJ_AHB_RIS_R & 0x01) == 0)
+        return; // Verifica se a interrupção foi no pin0
     // Limpa o evento de interrupção para o pin0
     GPIO_PORTJ_AHB_ICR_R = 0x01;
 
@@ -344,7 +321,15 @@ void GPIO_Init(void)
     // 7. Habilitar resistor de pull-up interno, setar PUR para 1
     GPIO_PORTJ_AHB_PUR_R = 0x03; // Bit0 e bit1
     GPIO_PORTL_PUR_R = 0x0F;     // Bit0, 1, 2, 3
-
+    GPIO_PORTJ_AHB_IM_R = 0x0;
+    GPIO_PORTJ_AHB_IS_R = 0x0;
+    GPIO_PORTJ_AHB_IBE_R = 0x0;
+    GPIO_PORTJ_AHB_IEV_R = 0x0; // Falling edge
+    GPIO_PORTJ_AHB_ICR_R = 0x03;
+    GPIO_PORTJ_AHB_IM_R = 0x03;
+    // 8. Habilitar interrupção no NVIC para GPIOJ
+    NVIC_PRI12_R = 0;
+    NVIC_EN1_R = (1 << 19);
     // Inicializa o LCD após configurar todas as portas
     initLCD();
 }

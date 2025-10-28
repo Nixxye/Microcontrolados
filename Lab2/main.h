@@ -33,13 +33,14 @@ void SysTick_Wait1ms(uint32_t delay);
 void SysTick_Wait1us(uint32_t delay);
 
 uint32_t PortJ_Input(void);
-void USR_SW1_IntInit(void);
 void PortN_Output(uint32_t leds);
 void resetLCD();
 void lcd_data(uint8_t data);
 void lcd_puts(char *s);
 char Keypad_Scan(void);
 void GPIO_Init(void);
+
+void GPIOPortJ_Handler(void);
 
 
 #endif // MAIN_H__

@@ -17,7 +17,6 @@ int main(void)
 	PLL_Init();
     SysTick_Init();
     GPIO_Init();
-    USR_SW1_IntInit();
 
 	uint32_t senha_mestra = 1234;
 
