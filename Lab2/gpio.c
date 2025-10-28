@@ -194,27 +194,27 @@ char Keypad_Scan(void)
     {
         // 'i' representa a coluna (0 a 3)
         // O pino da coluna atual é (PM4 + i)
-        col_pin = (1 << (i + 4)); // 0x10, 0x20, 0x40, 0x80
+        col_pin = (1 << (i + 4));
 
-        // 1. Configurar colunas:
-        //    - Todas as colunas do teclado (PM4-PM7) como entrada (Hi-Z)
+        // Configurar colunas:
+        //    - Todas as colunas do teclado (PM4-PM7) como entrada alta impedância
         //    - Manter LCD (PM0-PM2) como saída
         GPIO_PORTM_DIR_R = (GPIO_PORTM_DIR_R & ~0xF0) | 0x07;
 
-        // 2. Configurar a coluna ATUAL (col_pin) como saída
+        // Configurar a coluna ATUAL (col_pin) como saída
         GPIO_PORTM_DIR_R |= col_pin;
 
-        // 3. Colocar 0 na coluna atual
+        // Colocar 0 na coluna atual
         //    (Garante que não afeta os pinos do LCD PM0-PM2)
         uint32_t current_portm_data = GPIO_PORTM_DATA_R;
         GPIO_PORTM_DATA_R = (current_portm_data & ~col_pin);
 
         SysTick_Wait1ms(5); // Pequeno delay para estabilizar o sinal
 
-        // 4. Verificar o valor de leitura das linhas (PL0-PL3)
+        // Verificar o valor de leitura das linhas (PL0-PL3)
         lines = GPIO_PORTL_DATA_R & 0x0F;
 
-        // 5. Se algum bit for 0, uma tecla foi pressionada
+        // Se algum bit for 0, uma tecla foi pressionada
         if (lines != 0x0F)
         {
             for (j = 0; j < 4; j++)
@@ -222,7 +222,7 @@ char Keypad_Scan(void)
                 // 'j' representa a linha (0 a 3)
                 if ((lines & (1 << j)) == 0)
                 {
-                    // 6. Encerra a varredura e retorna a tecla
+                    // Encerra a varredura e retorna a tecla
 
                     // Restaura colunas para entrada antes de sair
                     GPIO_PORTM_DIR_R = (GPIO_PORTM_DIR_R & ~0xF0) | 0x07;
@@ -233,10 +233,52 @@ char Keypad_Scan(void)
         }
     }
 
-    // 7. Se todos os bits = 1 (após varrer tudo), nenhuma tecla pressionada
+    // Se todos os bits = 1 (após varrer tudo), nenhuma tecla pressionada
     // Restaura colunas para entrada
     GPIO_PORTM_DIR_R = (GPIO_PORTM_DIR_R & ~0xF0) | 0x07;
     return '\0'; // Retorna nulo
+}
+
+void stepper_move(void) {
+  if (velocidade == 2)
+    for (int i = 0; i <= 2040 * 2; i++) {
+      if (sentido == 1)
+        GPIO_PORTH_AHB_DATA_R = ~(8 >> i % 4);
+      else
+        GPIO_PORTH_AHB_DATA_R = ~(1 << i % 4);
+      SysTick_Wait1ms(5);
+    }
+  else
+    for (int i = 0; i <= 2040 * 4; i++) {
+      if (sentido == 1) {
+        int indice = i % 8;
+        if (indice % 2) {
+          GPIO_PORTH_AHB_DATA_R = ~(8 >> (indice / 2));
+        } else {
+          if (indice == 7)
+            GPIO_PORTH_AHB_DATA_R = 6;
+          else
+            GPIO_PORTH_AHB_DATA_R =
+                ~((8 >> (indice / 2)) + (8 >> (indice / 2 + 1)));
+            // GPIO_PORTH_AHB_DATA_R =
+            //     (8 >> (indice / 2)) + (8 >> ((indice / 2 + 1) % 4)); poderiamos trocar o if ( indice == 7) por essa lógica. mas não testamos.
+        }
+      } else {
+        int indice = i % 8;
+        if (indice % 2) {
+          GPIO_PORTH_AHB_DATA_R = ~(1 << (indice / 2));
+        } else {
+          if (indice == 7)
+            GPIO_PORTH_AHB_DATA_R = 6;
+          else
+            GPIO_PORTH_AHB_DATA_R =
+                ~((1 << (indice / 2)) + (1 << (indice / 2 + 1)));
+            // GPIO_PORTH_AHB_DATA_R =
+            //     (1 << (indice / 2)) + (1 << ((indice / 2 + 1) % 4)); poderiamos trocar o if ( indice == 7) por essa lógica. mas não testamos.
+        }
+      }
+      SysTick_Wait1ms(5);
+    }
 }
 
 // -------------------------------------------------------------------------------
@@ -263,7 +305,7 @@ void GPIO_Init(void)
     while ((SYSCTL_PRTIMER_R & (0x1)) != (0x1))
         ;
 
-    // 2. Limpar o AMSEL para desabilitar a anal�gica
+    // Limpar o AMSEL para desabilitar a anal�gica
     GPIO_PORTJ_AHB_AMSEL_R = 0x00;
     GPIO_PORTN_AMSEL_R = 0x00;
     GPIO_PORTL_AMSEL_R = 0x00;
@@ -274,7 +316,7 @@ void GPIO_Init(void)
     GPIO_PORTH_AHB_AMSEL_R = 0x00;
     GPIO_PORTP_AMSEL_R = 0x00;
 
-    // 3. Limpar PCTL para selecionar o GPIO
+    // Limpar PCTL para selecionar o GPIO
     GPIO_PORTJ_AHB_PCTL_R = 0x00;
     GPIO_PORTN_PCTL_R = 0x00;
     GPIO_PORTL_PCTL_R = 0x00;
@@ -285,7 +327,7 @@ void GPIO_Init(void)
     GPIO_PORTP_PCTL_R = 0x00;
     GPIO_PORTH_AHB_PCTL_R = 0x00;
 
-    // 4. DIR para 0 se for entrada, 1 se for sa�da
+    // DIR para 0 se for entrada, 1 se for sa�da
     GPIO_PORTJ_AHB_DIR_R = 0x00;
     GPIO_PORTL_DIR_R = 0x00;
     GPIO_PORTM_DIR_R = 0x07;
@@ -296,7 +338,7 @@ void GPIO_Init(void)
     GPIO_PORTP_DIR_R = 0x20;
     GPIO_PORTH_AHB_DIR_R = 0x0F;
 
-    // 5. Limpar os bits AFSEL para 0 para selecionar GPIO sem fun��o alternativa
+    // Limpar os bits AFSEL para 0 para selecionar GPIO sem fun��o alternativa
     GPIO_PORTJ_AHB_AFSEL_R = 0x00;
     GPIO_PORTL_AFSEL_R = 0x00;
     GPIO_PORTM_AFSEL_R = 0x00;
@@ -307,7 +349,7 @@ void GPIO_Init(void)
     GPIO_PORTP_AFSEL_R = 0x00;
     GPIO_PORTH_AHB_AFSEL_R = 0x00;
 
-    // 6. Setar os bits de DEN para habilitar I/O digital
+    // Setar os bits de DEN para habilitar I/O digital
     GPIO_PORTJ_AHB_DEN_R = 0x03; // Bit0 e bit1
     GPIO_PORTL_DEN_R = 0x0F;     // Bit0, 1, 2, 3
     GPIO_PORTM_DEN_R = 0xF7;     //
@@ -318,7 +360,7 @@ void GPIO_Init(void)
     GPIO_PORTP_DEN_R = 0x20;     // todos
     GPIO_PORTH_AHB_DEN_R = 0x0F; // BIT4 AO BIT7
 
-    // 7. Habilitar resistor de pull-up interno, setar PUR para 1
+    // Habilitar resistor de pull-up interno, setar PUR para 1
     GPIO_PORTJ_AHB_PUR_R = 0x03; // Bit0 e bit1
     GPIO_PORTL_PUR_R = 0x0F;     // Bit0, 1, 2, 3
     GPIO_PORTJ_AHB_IM_R = 0x0;
@@ -327,7 +369,7 @@ void GPIO_Init(void)
     GPIO_PORTJ_AHB_IEV_R = 0x0; // Falling edge
     GPIO_PORTJ_AHB_ICR_R = 0x03;
     GPIO_PORTJ_AHB_IM_R = 0x03;
-    // 8. Habilitar interrupção no NVIC para GPIOJ
+    // Habilitar interrupção no NVIC para GPIOJ
     NVIC_PRI12_R = 0;
     NVIC_EN1_R = (1 << 19);
     // Inicializa o LCD após configurar todas as portas

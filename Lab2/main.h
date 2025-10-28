@@ -18,14 +18,15 @@ typedef enum {
 
 /* Flag setada pela ISR quando USR_SW1 é pressionada (falling edge) */
 extern volatile int usr_sw1_event;
+extern uint8_t sentido;
+extern uint8_t velocidade;
+extern uint16_t posicao_motor;
 
 /* Protótipo da função de inicialização da interrupção */
-void Pisca_leds(void);
 void AcenderTodosLEDs(void);
 void collect_password(char *buf, int *len, int maxlen);
 void stepper_close(void);
 void stepper_open(void);
-int usr_sw1_pressed(void);
 
 void PLL_Init(void);
 void SysTick_Init(void);
@@ -38,6 +39,7 @@ void resetLCD();
 void lcd_data(uint8_t data);
 void lcd_puts(char *s);
 char Keypad_Scan(void);
+void stepper_move(void);
 void GPIO_Init(void);
 
 void GPIOPortJ_Handler(void);

@@ -8,6 +8,9 @@
 
 static char user_password[USER_PASS_LEN + 1] = "0000"; // inicial temporária
 static const char master_password[] = "1234";
+uint8_t sentido = 0;
+uint8_t velocidade = 0;
+uint16_t posicao_motor = 0;
 
 /* Flag setada pela ISR quando USR_SW1 é pressionada (falling edge) */
 volatile int usr_sw1_event = 0;
@@ -17,8 +20,6 @@ int main(void)
 	PLL_Init();
     SysTick_Init();
     GPIO_Init();
-
-	uint32_t senha_mestra = 1234;
 
 	CofreState state = STATE_ABERTO;
     int failed_attempts = 0;
@@ -128,27 +129,6 @@ int main(void)
     }
 }
 
-void Pisca_leds(void)
-{
-	// Aqui precisa ser os LEDs da PAT não da placa vermelha
-	/* Cada LED mapeado em:
-		PA7
-		PA6
-		PA5
-		PA4
-		PQ3
-		PQ2
-		PQ1
-		PQ0
-	*/
-	// Precisa fazer o negocio com o transistor lá usando a porta PP5
-
-	PortN_Output(0x2);
-	SysTick_Wait1ms(250);
-	PortN_Output(0x1);
-	SysTick_Wait1ms(250);
-}
-
 /* Coleta uma senha até '#' ser pressionado.
    - buf: buffer de saída
    - len: saída com comprimento (sem o terminador)
@@ -188,16 +168,17 @@ void collect_password(char *buf, int *len, int maxlen) {
 void stepper_close(void) {
     // aguarda 1s antes de girar (conforme enunciado)
     SysTick_Wait1ms(1000);
-    // simula tempo de 2 voltas no sentido anti-horário no modo meio passo
-    SysTick_Wait1ms(2000);
+    velocidade = 1;
+    sentido = 1;
+    stepper_move();
+    SysTick_Wait1ms(1000);
 }
 
 void stepper_open(void) {
-	// simula tempo de 2 voltas no sentido horário no modo passo completo
-    SysTick_Wait1ms(2000);
-}
-
-/* Leitura simples da chave USR_SW1: Port J bit 0 (pull-up, 0 quando pressionado) */
-int usr_sw1_pressed(void) {
-    return (PortJ_Input() & 0x01) == 0;
+    // aguarda 1s antes de girar (conforme enunciado)
+    SysTick_Wait1ms(1000);
+    velocidade = 2;
+    sentido = 0;
+    stepper_move();
+    SysTick_Wait1ms(1000);
 }
