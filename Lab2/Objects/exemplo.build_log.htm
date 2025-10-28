@@ -26,7 +26,17 @@ Project File Date:  10/26/2025
 
 <h2>Output:</h2>
 *** Using Compiler 'V5.06 update 7 (build 960)', folder: 'C:\Keil_v5\ARM\ARMCC\Bin'
-Build target 'Target 1'
+Rebuild target 'Target 1'
+assembling startup.s...
+compiling main.c...
+main.h(38): warning:  #1295-D: Deprecated declaration resetLCD - give arg types
+  void resetLCD();
+main.h(48): warning:  #1-D: last line of file ends without a newline
+  #endif // MAIN_H__
+main.c(184): warning:  #1-D: last line of file ends without a newline
+  }
+main.c: 3 warnings, 0 errors
+assembling utils.s...
 compiling gpio.c...
 main.h(38): warning:  #1295-D: Deprecated declaration resetLCD - give arg types
   void resetLCD();
@@ -36,8 +46,8 @@ gpio.c(377): warning:  #1-D: last line of file ends without a newline
   }
 gpio.c: 3 warnings, 0 errors
 linking...
-Program Size: Code=3530 RO-data=54 RW-data=16 ZI-data=1120  
-".\Objects\exemplo.axf" - 0 Error(s), 3 Warning(s).
+Program Size: Code=3210 RO-data=54 RW-data=16 ZI-data=1120  
+".\Objects\exemplo.axf" - 0 Error(s), 6 Warning(s).
 
 <h2>Software Packages used:</h2>
 

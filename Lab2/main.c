@@ -6,8 +6,8 @@
 
 #include "main.h"
 
-static char user_password[USER_PASS_LEN + 1] = "0000"; // inicial temporária
-static const char master_password[] = "1234";
+char user_password[USER_PASS_LEN + 1] = "0000"; // inicial temporária
+const char master_password[] = "1234";
 uint8_t sentido = 0;
 uint8_t velocidade = 0;
 uint16_t posicao_motor = 0;
@@ -83,10 +83,10 @@ int main(void)
 					
 					// Quando USR_SW1 for detectada, pede senha mestra
 					collect_password(input_buf, &input_len, USER_PASS_LEN + 1);
+                    SysTick_Wait1ms(200);
 					if (input_len == USER_PASS_LEN) {
 						if(strncmp(input_buf, master_password, USER_PASS_LEN) == 0) {
 							// Mestre ok -> abrir e voltar a aberto
-							stepper_open();
 							state = STATE_ABRINDO;
 							failed_attempts = 0;
 						} else {

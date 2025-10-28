@@ -22,15 +22,13 @@ Section Cross References
     main.o(i.main) refers to main.o(i.collect_password) for collect_password
     main.o(i.main) refers to strncmp.o(.text) for strncmp
     main.o(i.main) refers to gpio.o(i.AcenderTodosLEDs) for AcenderTodosLEDs
-    main.o(i.main) refers to main.o(i.stepper_open) for stepper_open
     main.o(i.main) refers to main.o(i.stepper_close) for stepper_close
+    main.o(i.main) refers to main.o(i.stepper_open) for stepper_open
     main.o(i.main) refers to main.o(.data) for user_password
     main.o(i.main) refers to main.o(.constdata) for master_password
     main.o(i.stepper_close) refers to utils.o(.text) for SysTick_Wait1ms
-    main.o(i.stepper_close) refers to gpio.o(i.stepper_move) for stepper_move
     main.o(i.stepper_close) refers to main.o(.data) for velocidade
     main.o(i.stepper_open) refers to utils.o(.text) for SysTick_Wait1ms
-    main.o(i.stepper_open) refers to gpio.o(i.stepper_move) for stepper_move
     main.o(i.stepper_open) refers to main.o(.data) for velocidade
     gpio.o(i.AcenderTodosLEDs) refers to utils.o(.text) for SysTick_Wait1ms
     gpio.o(i.GPIOPortJ_Handler) refers to main.o(.data) for usr_sw1_event
@@ -154,8 +152,9 @@ Removing Unused input sections from the image.
 
     Removing gpio.o(i.PortJ_Input), (12 bytes).
     Removing gpio.o(i.PortN_Output), (28 bytes).
+    Removing gpio.o(i.stepper_move), (316 bytes).
 
-2 unused section(s) (total 40 bytes) removed from the image.
+3 unused section(s) (total 356 bytes) removed from the image.
 
 ==============================================================================
 
@@ -166,51 +165,51 @@ Image Symbol Table
     Symbol Name                              Value     Ov Type        Size  Object(Section)
 
     RESET                                    0x00000000   Section      560  startup.o(RESET)
-    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit2.o ABSOLUTE
+    ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit1.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardinit3.o ABSOLUTE
     ../clib/angel/boardlib.s                 0x00000000   Number         0  boardshut.o ABSOLUTE
-    ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_copy.o ABSOLUTE
     ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_zi.o ABSOLUTE
+    ../clib/angel/handlers.s                 0x00000000   Number         0  __scatter_copy.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit.o ABSOLUTE
-    ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry2.o ABSOLUTE
     ../clib/angel/kernel.s                   0x00000000   Number         0  __rtentry4.o ABSOLUTE
+    ../clib/angel/kernel.s                   0x00000000   Number         0  rtexit2.o ABSOLUTE
     ../clib/angel/rt.s                       0x00000000   Number         0  rt_raise.o ABSOLUTE
     ../clib/angel/scatter.s                  0x00000000   Number         0  __scatter.o ABSOLUTE
     ../clib/angel/startup.s                  0x00000000   Number         0  __main.o ABSOLUTE
-    ../clib/angel/sys.s                      0x00000000   Number         0  libspace.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  indicate_semi.o ABSOLUTE
     ../clib/angel/sys.s                      0x00000000   Number         0  sys_stackheap_outer.o ABSOLUTE
-    ../clib/angel/sys.s                      0x00000000   Number         0  use_no_semi.o ABSOLUTE
-    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_command.o ABSOLUTE
-    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_exit.o ABSOLUTE
+    ../clib/angel/sys.s                      0x00000000   Number         0  libspace.o ABSOLUTE
     ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_wrch.o ABSOLUTE
+    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_exit.o ABSOLUTE
+    ../clib/angel/sysapp.c                   0x00000000   Number         0  sys_command.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  no_argv.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  _get_argv_nomalloc.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
     ../clib/armsys.c                         0x00000000   Number         0  argv_veneer.o ABSOLUTE
     ../clib/heapalloc.c                      0x00000000   Number         0  hrguard.o ABSOLUTE
     ../clib/heapaux.c                        0x00000000   Number         0  heapauxi.o ABSOLUTE
-    ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown.o ABSOLUTE
-    ../clib/libinit.s                        0x00000000   Number         0  libinit2.o ABSOLUTE
     ../clib/libinit.s                        0x00000000   Number         0  libshutdown2.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_abrt_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
+    ../clib/libinit.s                        0x00000000   Number         0  libinit.o ABSOLUTE
+    ../clib/libinit.s                        0x00000000   Number         0  libinit2.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_other.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_stak_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_segv_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_exit.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_other.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_outer.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_formal.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_cppl_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_pvfn_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_stak_inner.o ABSOLUTE
-    ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_general.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtmem_outer.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_abrt_inner.o ABSOLUTE
     ../clib/signal.c                         0x00000000   Number         0  defsig_fpe_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  __raise.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_rtred_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_pvfn_inner.o ABSOLUTE
+    ../clib/signal.c                         0x00000000   Number         0  defsig_cppl_inner.o ABSOLUTE
     ../clib/signal.s                         0x00000000   Number         0  defsig.o ABSOLUTE
     ../clib/stdlib.c                         0x00000000   Number         0  exit.o ABSOLUTE
     ../clib/string.c                         0x00000000   Number         0  strncmp.o ABSOLUTE
@@ -289,17 +288,14 @@ Image Symbol Table
     i.lcd_data                               0x000009c4   Section        0  gpio.o(i.lcd_data)
     i.lcd_puts                               0x00000a18   Section        0  gpio.o(i.lcd_puts)
     i.main                                   0x00000a30   Section        0  main.o(i.main)
-    i.resetLCD                               0x00000c1c   Section        0  gpio.o(i.resetLCD)
-    i.stepper_close                          0x00000c2c   Section        0  main.o(i.stepper_close)
-    i.stepper_move                           0x00000c58   Section        0  gpio.o(i.stepper_move)
-    i.stepper_open                           0x00000d94   Section        0  main.o(i.stepper_open)
-    x$fpl$fpinit                             0x00000dc0   Section       10  fpinit.o(x$fpl$fpinit)
-    $v0                                      0x00000dc0   Number         0  fpinit.o(x$fpl$fpinit)
-    .constdata                               0x00000dca   Section        5  main.o(.constdata)
-    master_password                          0x00000dca   Data           5  main.o(.constdata)
-    .constdata                               0x00000dd0   Section       16  gpio.o(.constdata)
+    i.resetLCD                               0x00000c20   Section        0  gpio.o(i.resetLCD)
+    i.stepper_close                          0x00000c30   Section        0  main.o(i.stepper_close)
+    i.stepper_open                           0x00000c58   Section        0  main.o(i.stepper_open)
+    x$fpl$fpinit                             0x00000c80   Section       10  fpinit.o(x$fpl$fpinit)
+    $v0                                      0x00000c80   Number         0  fpinit.o(x$fpl$fpinit)
+    .constdata                               0x00000c8a   Section        5  main.o(.constdata)
+    .constdata                               0x00000c90   Section       16  gpio.o(.constdata)
     .data                                    0x20000000   Section       16  main.o(.data)
-    user_password                            0x20000000   Data           5  main.o(.data)
     .bss                                     0x20000010   Section       96  libspace.o(.bss)
     HEAP                                     0x20000070   Section        0  startup.o(HEAP)
     STACK                                    0x20000070   Section     1024  startup.o(STACK)
@@ -529,16 +525,17 @@ Image Symbol Table
     lcd_command                              0x0000097d   Thumb Code    60  gpio.o(i.lcd_command)
     lcd_data                                 0x000009c5   Thumb Code    70  gpio.o(i.lcd_data)
     lcd_puts                                 0x00000a19   Thumb Code    22  gpio.o(i.lcd_puts)
-    main                                     0x00000a31   Thumb Code   348  main.o(i.main)
-    resetLCD                                 0x00000c1d   Thumb Code    16  gpio.o(i.resetLCD)
-    stepper_close                            0x00000c2d   Thumb Code    34  main.o(i.stepper_close)
-    stepper_move                             0x00000c59   Thumb Code   304  gpio.o(i.stepper_move)
-    stepper_open                             0x00000d95   Thumb Code    36  main.o(i.stepper_open)
-    _fp_init                                 0x00000dc1   Thumb Code    10  fpinit.o(x$fpl$fpinit)
-    __fplib_config_fpu_vfp                   0x00000dc9   Thumb Code     0  fpinit.o(x$fpl$fpinit)
-    __fplib_config_pureend_doubles           0x00000dc9   Thumb Code     0  fpinit.o(x$fpl$fpinit)
-    Region$$Table$$Base                      0x00000de0   Number         0  anon$$obj.o(Region$$Table)
-    Region$$Table$$Limit                     0x00000e00   Number         0  anon$$obj.o(Region$$Table)
+    main                                     0x00000a31   Thumb Code   350  main.o(i.main)
+    resetLCD                                 0x00000c21   Thumb Code    16  gpio.o(i.resetLCD)
+    stepper_close                            0x00000c31   Thumb Code    30  main.o(i.stepper_close)
+    stepper_open                             0x00000c59   Thumb Code    32  main.o(i.stepper_open)
+    _fp_init                                 0x00000c81   Thumb Code    10  fpinit.o(x$fpl$fpinit)
+    __fplib_config_fpu_vfp                   0x00000c89   Thumb Code     0  fpinit.o(x$fpl$fpinit)
+    __fplib_config_pureend_doubles           0x00000c89   Thumb Code     0  fpinit.o(x$fpl$fpinit)
+    master_password                          0x00000c8a   Data           5  main.o(.constdata)
+    Region$$Table$$Base                      0x00000ca0   Number         0  anon$$obj.o(Region$$Table)
+    Region$$Table$$Limit                     0x00000cc0   Number         0  anon$$obj.o(Region$$Table)
+    user_password                            0x20000000   Data           5  main.o(.data)
     sentido                                  0x20000005   Data           1  main.o(.data)
     velocidade                               0x20000006   Data           1  main.o(.data)
     posicao_motor                            0x20000008   Data           2  main.o(.data)
@@ -554,9 +551,9 @@ Memory Map of the image
 
   Image Entry point : 0x00000209
 
-  Load Region LR_1 (Base: 0x00000000, Size: 0x00000e10, Max: 0xffffffff, ABSOLUTE)
+  Load Region LR_1 (Base: 0x00000000, Size: 0x00000cd0, Max: 0xffffffff, ABSOLUTE)
 
-    Execution Region ER_RO (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00000e00, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RO (Exec base: 0x00000000, Load base: 0x00000000, Size: 0x00000cc0, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -630,26 +627,25 @@ Memory Map of the image
     0x000009c4   0x000009c4   0x00000054   Code   RO           67    i.lcd_data          gpio.o
     0x00000a18   0x00000a18   0x00000016   Code   RO           68    i.lcd_puts          gpio.o
     0x00000a2e   0x00000a2e   0x00000002   PAD
-    0x00000a30   0x00000a30   0x000001ec   Code   RO           16    i.main              main.o
-    0x00000c1c   0x00000c1c   0x00000010   Code   RO           69    i.resetLCD          gpio.o
-    0x00000c2c   0x00000c2c   0x0000002c   Code   RO           17    i.stepper_close     main.o
-    0x00000c58   0x00000c58   0x0000013c   Code   RO           70    i.stepper_move      gpio.o
-    0x00000d94   0x00000d94   0x0000002c   Code   RO           18    i.stepper_open      main.o
-    0x00000dc0   0x00000dc0   0x0000000a   Code   RO          238    x$fpl$fpinit        fz_wm.l(fpinit.o)
-    0x00000dca   0x00000dca   0x00000005   Data   RO           19    .constdata          main.o
-    0x00000dcf   0x00000dcf   0x00000001   PAD
-    0x00000dd0   0x00000dd0   0x00000010   Data   RO           71    .constdata          gpio.o
-    0x00000de0   0x00000de0   0x00000020   Data   RO          308    Region$$Table       anon$$obj.o
+    0x00000a30   0x00000a30   0x000001f0   Code   RO           16    i.main              main.o
+    0x00000c20   0x00000c20   0x00000010   Code   RO           69    i.resetLCD          gpio.o
+    0x00000c30   0x00000c30   0x00000028   Code   RO           17    i.stepper_close     main.o
+    0x00000c58   0x00000c58   0x00000028   Code   RO           18    i.stepper_open      main.o
+    0x00000c80   0x00000c80   0x0000000a   Code   RO          238    x$fpl$fpinit        fz_wm.l(fpinit.o)
+    0x00000c8a   0x00000c8a   0x00000005   Data   RO           19    .constdata          main.o
+    0x00000c8f   0x00000c8f   0x00000001   PAD
+    0x00000c90   0x00000c90   0x00000010   Data   RO           71    .constdata          gpio.o
+    0x00000ca0   0x00000ca0   0x00000020   Data   RO          308    Region$$Table       anon$$obj.o
 
 
-    Execution Region ER_RW (Exec base: 0x20000000, Load base: 0x00000e00, Size: 0x00000010, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_RW (Exec base: 0x20000000, Load base: 0x00000cc0, Size: 0x00000010, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
-    0x20000000   0x00000e00   0x00000010   Data   RW           20    .data               main.o
+    0x20000000   0x00000cc0   0x00000010   Data   RW           20    .data               main.o
 
 
-    Execution Region ER_ZI (Exec base: 0x20000010, Load base: 0x00000e10, Size: 0x00000460, Max: 0xffffffff, ABSOLUTE)
+    Execution Region ER_ZI (Exec base: 0x20000010, Load base: 0x00000cd0, Size: 0x00000460, Max: 0xffffffff, ABSOLUTE)
 
     Exec Addr    Load Addr    Size         Type   Attr      Idx    E Section Name        Object
 
@@ -665,13 +661,13 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   Object Name
 
-      1310        166         16          0          0       5769   gpio.o
-       684        168          5         16          0       8146   main.o
+       994        154         16          0          0       5006   gpio.o
+       680        170          5         16          0       8184   main.o
        608        532          0          0       1024       1040   startup.o
        484         92          0          0          0        384   utils.o
 
     ----------------------------------------------------------------------
-      3088        958         54         16       1024      15339   Object Totals
+      2768        948         54         16       1024      14614   Object Totals
          0          0         32          0          0          0   (incl. Generated)
          2          0          1          0          0          0   (incl. Padding)
 
@@ -723,15 +719,15 @@ Image component sizes
 
       Code (inc. data)   RO Data    RW Data    ZI Data      Debug   
 
-      3530        974         54         16       1120      14711   Grand Totals
-      3530        974         54         16       1120      14711   ELF Image Totals
-      3530        974         54         16          0          0   ROM Totals
+      3210        964         54         16       1120      14086   Grand Totals
+      3210        964         54         16       1120      14086   ELF Image Totals
+      3210        964         54         16          0          0   ROM Totals
 
 ==============================================================================
 
-    Total RO  Size (Code + RO Data)                 3584 (   3.50kB)
+    Total RO  Size (Code + RO Data)                 3264 (   3.19kB)
     Total RW  Size (RW Data + ZI Data)              1136 (   1.11kB)
-    Total ROM Size (Code + RO Data + RW Data)       3600 (   3.52kB)
+    Total ROM Size (Code + RO Data + RW Data)       3280 (   3.20kB)
 
 ==============================================================================
 
