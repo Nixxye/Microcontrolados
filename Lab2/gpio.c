@@ -83,7 +83,18 @@ void PortN_Output(uint32_t valor)
     temp = temp | valor;
     GPIO_PORTN_DATA_R = temp;
 }
-
+/**
+ * Acende TODOS os LEDs da PAT.
+ */
+void AcenderTodosLEDs(void)
+{
+    GPIO_PORTA_AHB_DATA_R = 0xF0;
+    GPIO_PORTQ_DATA_R = 0xF;
+    GPIO_PORTP_DATA_R = 0x20;
+    SysTick_Wait1ms(1);
+    GPIO_PORTP_DATA_R = 0xDF;
+    SysTick_Wait1ms(1);
+}
 // --- Funções do LCD ---
 
 /**

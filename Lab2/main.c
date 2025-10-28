@@ -77,7 +77,7 @@ int main(void)
                 resetLCD();
                 lcd_puts("Cofre Travado");
                 // Loop de espera que pisca LEDs e checa USR_SW1
-				Pisca_leds(); // pisca alternadamente
+				AcenderTodosLEDs(); // pisca alternadamente
 				if (usr_sw1_event) {
 					usr_sw1_event = 0;
 					

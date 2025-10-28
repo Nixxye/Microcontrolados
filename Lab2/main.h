@@ -21,6 +21,7 @@ extern volatile int usr_sw1_event;
 
 /* Protótipo da função de inicialização da interrupção */
 void Pisca_leds(void);
+void AcenderTodosLEDs(void);
 void collect_password(char *buf, int *len, int maxlen);
 void stepper_close(void);
 void stepper_open(void);
