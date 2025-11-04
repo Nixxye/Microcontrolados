@@ -166,6 +166,35 @@ void initLCD()
     SysTick_Wait1ms(2); // Espera 2ms (1.64ms é o mínimo)
 }
 
+void initUART() {
+  SYSCTL_RCGCUART_R = 0x1; // Ativa o clock para UART0
+  while ((SYSCTL_PRUART_R & 0x1) == 0) {}; // Espera a UART0 ficar pronta
+  UART0_CTL_R = 0;
+  // UART_CTL_UARTEN = 0; // Desabilita a UART0 durante a configuração
+  // UART_CTL_HSE = 0; // Desabilita o modo High-Speed
+  // 86,8056
+  // 52
+  UART0_IBRD_R = 86;
+  UART0_FBRD_R = 52;
+  UART0_LCRH_R = 0x76;
+  UART0_CC_R = 0;
+
+  UART0_CTL_R = 0x301;
+
+  // UART_CTL_UARTEN = 1;
+  // UART_CTL_TXE = 1;
+  // UART_CTL_RXE = 1;
+
+  GPIO_PORTA_AHB_PCTL_R = 0x11; // Configura PA0 e PA1 para função UART
+  GPIO_PORTA_AHB_AFSEL_R = 0x03; // Habilita função alternativa em PA0 e PA1
+
+}
+
+void sendUART(char c) {
+  while (UART0_FR_R & UART_FR_TXFF); // Espera até que o buffer de transmissão esteja vazio
+  UART0_DR_R = c; // Envia o caractere
+}
+
 // --- (NOVO) Funções do Teclado (Port L e M) ---
 
 /**
@@ -239,47 +268,6 @@ char Keypad_Scan(void)
     return '\0'; // Retorna nulo
 }
 
-void stepper_move(void) {
-  if (velocidade == 2)
-    for (int i = 0; i <= 2040; i++) {
-      if (sentido == 1)
-        GPIO_PORTH_AHB_DATA_R = ~(8 >> i % 4);
-      else
-        GPIO_PORTH_AHB_DATA_R = ~(1 << i % 4);
-      SysTick_Wait1ms(5);
-    }
-  else
-    for (int i = 0; i <= 2040 * 2; i++) {
-      if (sentido == 1) {
-        int indice = i % 8;
-        if (indice % 2) {
-          GPIO_PORTH_AHB_DATA_R = ~(8 >> (indice / 2));
-        } else {
-          if (indice == 7)
-            GPIO_PORTH_AHB_DATA_R = 6;
-          else
-            GPIO_PORTH_AHB_DATA_R =
-                ~((8 >> (indice / 2)) + (8 >> (indice / 2 + 1)));
-            // GPIO_PORTH_AHB_DATA_R =
-            //     (8 >> (indice / 2)) + (8 >> ((indice / 2 + 1) % 4)); poderiamos trocar o if ( indice == 7) por essa lógica. mas não testamos.
-        }
-      } else {
-        int indice = i % 8;
-        if (indice % 2) {
-          GPIO_PORTH_AHB_DATA_R = ~(1 << (indice / 2));
-        } else {
-          if (indice == 7)
-            GPIO_PORTH_AHB_DATA_R = 6;
-          else
-            GPIO_PORTH_AHB_DATA_R =
-                ~((1 << (indice / 2)) + (1 << (indice / 2 + 1)));
-            // GPIO_PORTH_AHB_DATA_R =
-            //     (1 << (indice / 2)) + (1 << ((indice / 2 + 1) % 4)); poderiamos trocar o if ( indice == 7) por essa lógica. mas não testamos.
-        }
-      }
-      SysTick_Wait1ms(5);
-    }
-}
 
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
@@ -354,7 +342,7 @@ void GPIO_Init(void)
     GPIO_PORTL_DEN_R = 0x0F;     // Bit0, 1, 2, 3
     GPIO_PORTM_DEN_R = 0xF7;     //
     GPIO_PORTN_DEN_R = 0x03;     // Bit0 e bit1
-    GPIO_PORTA_AHB_DEN_R = 0xF0; // BIT4 AO BIT7
+    GPIO_PORTA_AHB_DEN_R = 0xF3; // BIT4 AO BIT7
     GPIO_PORTQ_DEN_R = 0x0F;     // BIT0, 1, 2, 3
     GPIO_PORTK_DEN_R = 0xFF;     // todos
     GPIO_PORTP_DEN_R = 0x20;     // todos
@@ -373,5 +361,6 @@ void GPIO_Init(void)
     NVIC_PRI12_R = 0;
     NVIC_EN1_R = (1 << 19);
     // Inicializa o LCD após configurar todas as portas
-    initLCD();
+    initUART();
+    // initLCD();
 }
