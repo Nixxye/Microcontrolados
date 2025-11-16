@@ -24,7 +24,12 @@ void lcd_data(uint8_t data);
 void lcd_puts(char *s);
 char Keypad_Scan(void);
 void GPIO_Init(void);
-void sendUART(char c);
+void lcd_command(uint8_t command);
+void ADC_Init(void);
+int converte();
+void initUART(void);
+void sendCharUART(char c);
+void sendIntUART(int c);
 
 void GPIOPortJ_Handler(void);
 

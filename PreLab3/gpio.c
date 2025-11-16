@@ -190,11 +190,14 @@ void initUART() {
 
 }
 
-void sendUART(char c) {
+void sendCharUART(char c) {
   while (UART0_FR_R & UART_FR_TXFF); // Espera até que o buffer de transmissão esteja vazio
   UART0_DR_R = c; // Envia o caractere
 }
-
+void sendIntUART(int c) {
+  while (UART0_FR_R & UART_FR_TXFF); // Espera até que o buffer de transmissão esteja vazio
+  UART0_DR_R = c; // Envia o inteiro
+}
 // --- (NOVO) Funções do Teclado (Port L e M) ---
 
 /**
@@ -268,6 +271,34 @@ char Keypad_Scan(void)
     return '\0'; // Retorna nulo
 }
 
+uint16 converte() {
+    ADC0_PSSI_R = 0x8; // Inicia a conversão no SS3
+    while ((ADC0_RIS_R & 0x8) == 0) {}; // Espera a conversão completar
+    uint16 valorConvertido = ADC0_SSFIFO3_R; // Lê o valor convertido
+    ADC0_ISC_R = 0x8; // ACK: limpar o bit de conversão (SS3) em ADC RIS
+    return valorConvertido;
+}
+
+
+void ADC_Init(void) {
+    SYSCTL_RCGCADC_R |= 0x1; // Ativa o clock para ADC0
+    while (SYSCTL_PRADC_R & 0x1 == 0) {}; // Espera o ADC0 ficar pronto
+    ADC0_PC_R = 0x226;
+    ADC0_SSPRI_R = 0x3210; // Prioridade das SS
+    ADC0_ACTSS_R &= ~0x8; // Desabilita o SS3 para configuração
+    ADC0_EMUX_R = 0x0F; // trigger continuo
+    // Seleciona o canal (bits 3:0) para a entrada analógica em PE4.
+    ADC0_SSMUX3_R |= 0x9;
+    // Configura o controle da amostra: para SS3 (apenas uma amostra)
+    // habilitar IE0 e END0 -> 0110b = 0x6
+    ADC0_SSCTL3_R = 0x6;
+
+    // Habilitar interrupção do sequenciador 3 no ADC
+    // ADC0_IM_R |= 0x8; // descomente se desejar usar interrupção
+
+    // Habilitar o sequenciador 3 (ASEN3)
+    ADC0_ACTSS_R |= 0x8;
+}
 
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
@@ -361,6 +392,6 @@ void GPIO_Init(void)
     NVIC_PRI12_R = 0;
     NVIC_EN1_R = (1 << 19);
     // Inicializa o LCD após configurar todas as portas
-    initUART();
+    // initUART();
     // initLCD();
 }

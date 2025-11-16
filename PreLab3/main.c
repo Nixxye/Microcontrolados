@@ -14,9 +14,15 @@ int main(void)
 	PLL_Init();
     SysTick_Init();
     GPIO_Init();
-
+    initUART();
+    ADC_Init();
+    int valorADC = 0;
     while (1) {
-        sendUART('k');
+        valorADC = converte();
+        // sendIntUART(valorADC);
+        sendCharUART(valorADC);
+        // sendCharUART('\n');
+        // sendUART('k');
         // pequeno intervalo para evitar busy-loop extremo
         SysTick_Wait1ms(50);
     }
