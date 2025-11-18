@@ -10,7 +10,7 @@ typedef enum {
 
 void Motor_Init(void);
 void Motor_Enable(void);   // liga EN (PF2)
-void Motor_Disable(void);  // desliga EN (PF2)
-void Motor_SetDirection(Motor_Dir_t dir);
+// void Motor_Disable(void);  // desliga EN (PF2)
+// void Motor_SetDirection(Motor_Dir_t dir);
 
 #endif // MOTOR_H

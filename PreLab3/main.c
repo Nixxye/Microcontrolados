@@ -19,7 +19,7 @@ int main(void)
     initUART();
     ADC_Init();
     Motor_Init();
-    Motor_SetDirection(MOTOR_DIR_FORWARD);
+    // Motor_SetDirection(MOTOR_DIR_FORWARD);
     Motor_Enable();
     SysTick_Wait1ms(1000);
 
@@ -27,11 +27,11 @@ int main(void)
     int valorADC = 0;
     char receivedChar = '/0';
     char str[10];
-    int direction = 1; // 1 para horário, 0 para anti-horário
-    int speed = 0;
     while (1) {
+        int direction = 1; // 1 para horário, 0 para anti-horário
+        int speed = 0;
+        setDCMotorSpeed(speed, direction);
         sendStringUART("Motor parado, pressione '*' para iniciar.");
-        setDCMotorSpeed(0);
         // Passo 2
         do {
             receivedChar = receiveCharUART();
@@ -62,33 +62,27 @@ int main(void)
                         default:
                             break;
                     }
-                    sendStringUART("Direção: ");
-                    if (direction) {
-                        sendStringUART("Horário.        ");
-                    } else {
-                        sendStringUART("Anti-horário.   ");
-                    }
-                    sendStringUART("");
-                    sendStringUART("Velocidade: ");
-                    intToStr(speed, str);
-                    sendStringUART(str);
-                    sendStringUART("\r\n");
-                    SysTick_Wait1ms(1000);
+                    setDCMotorSpeed(speed * (direction ? 1 : -1), direction);
+                    receivedChar = receiveCharUART();
                 }
             case 't':
-                sendStringUART("Controle via terminal selecionado. Envie '0' a '5' para definir a velocidade do motor, 'h' para sentido horario, 'a' para sentido anti-horario, e 's' para parar.\n");
-                while (receivedChar != 's') {
-                    receivedChar = receiveCharUART();
-                    if (receivedChar >= '0' && receivedChar <= '5') {
-                        speed = (receivedChar - '0');
-                        setDCMotorSpeed(speed);
-                        sendStringUART("Velocidade do motor ajustada para: ");
-                        sendCharUART(receivedChar);
-                        sendCharUART('\n');
-                    } else if (receivedChar == 'h') {
-                        // Lógica para o motor no sentido horário
-                    } else if (receivedChar == 'a') {
-                        // Lógica para o motor no sentido anti-horário
+                sendStringUART("Controle via terminal selecionado. Envie '0' a '5' para definir a velocidade do motor, 'h' para sentido horario, 'a' para sentido anti-horario, e 's' para parar.\n");                while (receivedChar != 's') {
+                    while (receivedChar != 's') {
+                        receivedChar = receiveCharUART();
+                        if (receivedChar >= '0' && receivedChar <= '5') {
+                            speed = (receivedChar - '0');
+                            sendStringUART("Velocidade do motor ajustada para: ");
+                            sendCharUART(receivedChar);
+                            sendCharUART('\n');
+                        } else if (receivedChar == 'h') {
+                            sendStringUART("Direcao do motor ajustada para horario.\n");
+                            direction = 1;
+                        } else if (receivedChar == 'a') {
+                            sendStringUART("Direcao do motor ajustada para anti-horario.\n");
+                            direction = 0;
+                        }
+                        setDCMotorSpeed(speed * 20 * (direction ? 1 : -1), direction);
+                        SysTick_Wait1ms(100);
                     }
                 }
             default:

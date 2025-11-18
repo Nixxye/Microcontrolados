@@ -34,9 +34,13 @@ volatile uint32_t pwm_pin_mask = 0x01;
 
 int velocidade_atual = 0;
 int velocidade_alvo = 0;
+int velocidade_modulo = 0;
+int direcao = 0;
+int contadorPrint = 0;
+char str[10];
 
 // Atualiza o duty cycle do PWM (0..100). Ajusta ticks correspondentes
-void PWM_SetDuty(uint8_t duty)
+void PWM_SetDuty(uint8_t duty, int direction)
 {
     if (duty > 100) 
         duty = 100;
@@ -44,16 +48,17 @@ void PWM_SetDuty(uint8_t duty)
     pwm_duty = duty;
     pwm_high_ticks = (pwm_period_ticks * pwm_duty) / 100;
     pwm_low_ticks = pwm_period_ticks - pwm_high_ticks;
+    pwm_pin_mask = direction ? 0x01 : 0x02; // PE0 para horário, PE1 para anti-horário
 
     // Ajusta imediatamente o reload do timer conforme o estado atual
     if (pwm_state == 1) {
         if (pwm_high_ticks == 0) pwm_high_ticks = 1;
         TIMER0_TAILR_R = pwm_high_ticks - 1;
-        GPIO_PORTE_AHB_DATA_R |= 0x01;
+        GPIO_PORTE_AHB_DATA_R |= pwm_pin_mask;
     } else {
         if (pwm_low_ticks == 0) pwm_low_ticks = 1;
         TIMER0_TAILR_R = pwm_low_ticks - 1;
-        GPIO_PORTE_AHB_DATA_R &= ~0x01;
+        GPIO_PORTE_AHB_DATA_R &= ~0x03;
     }
 }
 
@@ -86,6 +91,25 @@ void Timer0A_Handler(void) {
         if (pwm_high_ticks == 0) 
             pwm_high_ticks = 1;
         TIMER0_TAILR_R = pwm_high_ticks - 1;
+    }
+
+    contadorPrint = (contadorPrint + 1) % 5000;
+    if (contadorPrint == 0) {
+        sendStringUART("Direcao: ");
+        if (velocidade_atual > 0) {
+            sendStringUART("Horario.        ");
+        } else {
+            sendStringUART("Anti-horario.   ");
+        }
+        sendStringUART("");
+        sendStringUART("Velocidade: ");
+        intToStr(velocidade_modulo, str);
+        sendStringUART(str);
+        sendStringUART("\r\n");
+        sendStringUART("Velocidade alvo: ");
+        intToStr(velocidade_alvo, str);
+        sendStringUART(str);
+        sendStringUART("\r\n");
     }
 }
 
@@ -303,12 +327,8 @@ void sendStringUART(char* str) {
 }
 
 char receiveCharUART(void) {
-    while (UART0_FR_R & UART_FR_RXFE); // Espera até que haja dados para ler
+    // while (UART0_FR_R & UART_FR_RXFE); // Espera até que haja dados para ler
     return (char)(UART0_DR_R & 0xFF); // Lê e retorna o caractere recebido
-}
-
-void setDCMotorSpeed(int speed) {
-    
 }
 
 void intToStr(int N, char *str) {
@@ -435,21 +455,23 @@ void atualiza_velocidade(){
     else if(velocidade_atual > velocidade_alvo){
         velocidade_atual--;
     }
+    if (velocidade_atual < 0) {
+        direcao = 0;
+    } else {
+        direcao = 1;
+    }
+    velocidade_modulo = (velocidade_atual < 0) ? -velocidade_atual : velocidade_atual;
 }
 
-void setDCMotorSpeed(int speed) {
+void setDCMotorSpeed(int speed, int direction) {
     velocidade_alvo = speed;
     while (velocidade_atual != velocidade_alvo) {
         atualiza_velocidade();
+        PWM_SetDuty(velocidade_modulo, direcao);
         SysTick_Wait1ms(100);
     }
-    if (speed > 0) {
-        // PWM_SetDuty(speed);
-    } else if (speed < 0) {
-        // PWM_SetDuty(-speed);
-    } else {
-        // PWM_SetDuty(0);
-    }
+    PWM_SetDuty(velocidade_modulo, direcao);
+    SysTick_Wait1ms(30);
 }
 
 void ADC_Init(void) {
@@ -472,6 +494,19 @@ void ADC_Init(void) {
     ADC0_ACTSS_R |= 0x8;
 }
 
+#define MOTOR_EN_MASK  (1 << 2) // PF2
+
+void Motor_Init(void)
+{
+    // GPIO_PORTF_AHB_DATA_R &= ~MOTOR_EN_MASK; // inicialmente desabilitado
+    GPIO_PORTE_AHB_DATA_R &= ~0x03; // garantir pinos em 0
+}
+
+void Motor_Enable(void)
+{
+    // GPIO_PORTF_AHB_DATA_R |= MOTOR_EN_MASK; // PF2 = 1 -> habilita L293
+}
+
 // -------------------------------------------------------------------------------
 // Função GPIO_Init
 // Inicializa os ports J, N (para usuário) e K, M (para o LCD)
@@ -483,7 +518,7 @@ void GPIO_Init(void)
     // RCGCGPIO
     SYSCTL_RCGCGPIO_R =
         (GPIO_PORTA | GPIO_PORTE | GPIO_PORTJ | GPIO_PORTK | GPIO_PORTL | GPIO_PORTM |
-         GPIO_PORTN | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP | );
+         GPIO_PORTN | GPIO_PORTH | GPIO_PORTQ | GPIO_PORTP);
     // 1b.   ap�s isso verificar no PRGPIO se a porta est� pronta para uso.
         while ((SYSCTL_PRGPIO_R &
             (GPIO_PORTA | GPIO_PORTE | GPIO_PORTJ | GPIO_PORTK | GPIO_PORTL | GPIO_PORTM |
@@ -531,7 +566,7 @@ void GPIO_Init(void)
     GPIO_PORTP_DIR_R = 0x20;
     GPIO_PORTH_AHB_DIR_R = 0x0F;
     GPIO_PORTE_AHB_DIR_R = 0x03; // PE0 e PE1 como saída
-    GPIO_PORTF_AHB_DIR_R = 0x04; // PF2 saída
+    // GPIO_PORTF_AHB_DIR_R = 0x04; // PF2 saída
 
     // Limpar os bits AFSEL para 0 para selecionar GPIO sem fun��o alternativa
     GPIO_PORTJ_AHB_AFSEL_R = 0x00;
@@ -556,7 +591,7 @@ void GPIO_Init(void)
     GPIO_PORTP_DEN_R = 0x20;     // todos
     GPIO_PORTH_AHB_DEN_R = 0x0F; // BIT4 AO BIT7
     GPIO_PORTE_AHB_DEN_R = 0x03; // habilita PE0 e PE1
-    GPIO_PORTF_AHB_DEN_R = 0x04; // PF2 digital enable
+    // GPIO_PORTF_AHB_DEN_R = 0x04; // PF2 digital enable
 
     // Habilitar resistor de pull-up interno, setar PUR para 1
     GPIO_PORTJ_AHB_PUR_R = 0x03; // Bit0 e bit1
